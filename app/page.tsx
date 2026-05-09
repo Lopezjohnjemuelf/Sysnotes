@@ -1,29 +1,14 @@
-const releaseNotes = [
-  {
-    version: "v2.4.0",
-    date: "May 6, 2026",
-    title: "Public changelog refresh",
-    summary:
-      "A cleaner release-note experience with grouped updates, clearer status labels, and faster scanning.",
-    tags: ["Product", "UX", "Website"],
-  },
-  {
-    version: "v2.3.2",
-    date: "April 22, 2026",
-    title: "Search quality improvements",
-    summary:
-      "Release entries now rank more naturally by title, version, and category relevance.",
-    tags: ["Search", "Performance"],
-  },
-  {
-    version: "v2.3.0",
-    date: "April 8, 2026",
-    title: "Team publishing workflow",
-    summary:
-      "Editors can stage web changes, preview drafts, and publish notes with more predictable review steps.",
-    tags: ["Workflow", "Admin"],
-  },
-];
+/*
+ * SYSNOTES ROOT PAGE IS FROZEN.
+ * This page is reserved for Sysnotes-owned releases only.
+ * Do not add tenant release marketing, tenant coming soon states, tenant branding, or tenant-managed release content here.
+ * All tenant-facing release pages must be implemented under /[slug]/*.
+ */
+
+import Link from "next/link";
+import { TenantWordmark } from "@/components/admin";
+import { TagFilter } from "@/components/tag-filter";
+import { getReleasePath, releaseNotes } from "@/data/releases";
 
 const webChanges = [
   {
@@ -50,106 +35,151 @@ const metrics = [
   { value: "99.9%", label: "Website uptime" },
 ];
 
-const navLinks = [
-  { label: "Releases", href: "#release-notes" },
-  { label: "Web changes", href: "#web-changes" },
-  { label: "Summary", href: "#summary" },
+const intelligenceFeatures = [
+  {
+    label: "Migration and support",
+    copy:
+      "Structured publishing support keeps release notes organized as teams move updates into Sysnotes.",
+    mark: "01",
+  },
+  {
+    label: "Security and compliance",
+    copy:
+      "Clear public release history helps teams document changes, review status, and keep stakeholders aligned.",
+    mark: "02",
+  },
+  {
+    label: "Access control",
+    copy:
+      "Draft, private, and published states separate internal review from customer-facing release communication.",
+    mark: "03",
+  },
+  {
+    label: "Auth-protected content",
+    copy:
+      "Private release links make sensitive updates available only to the people who should review them.",
+    mark: "04",
+  },
 ];
 
-function BrandWordmark() {
-  return (
-    <>
-      <span className="font-semibold">Sysnotes</span>{" "}
-      <span className="text-[0.85em] font-normal text-[var(--text-muted-4)]">
-        by JFL
-      </span>
-    </>
-  );
-}
+const navLinks = [
+  { label: "About", href: "/about" },
+  { label: "Login", href: "/login" },
+];
 
 export default function Home() {
   const year = new Date().getFullYear();
 
   return (
     <main className="min-h-screen bg-[var(--surface-page)] text-[var(--text-primary)]">
-      <section className="border-b border-[var(--header-border)] bg-[var(--header-bg)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
-          <a className="text-lg tracking-normal" href="#">
-            <BrandWordmark />
-          </a>
-          <nav className="hidden items-center gap-7 text-sm text-[var(--header-link-color)] sm:flex">
+      <section className="sticky top-0 z-20 border-b border-[var(--header-border)] bg-[var(--header-bg)]">
+        <div className="mx-auto flex max-w-[90rem] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <Link className="text-lg tracking-normal" href="/">
+            <TenantWordmark />
+          </Link>
+          <nav className="flex items-center gap-3 text-sm text-[var(--header-link-color)] sm:gap-8">
             {navLinks.map((link) => (
-              <a
-                className="transition hover:text-[var(--header-link-hover)]"
+              <Link
+                className={
+                  link.label === "Login"
+                    ? "rounded-full bg-[var(--tenant-accent-bg)] px-4 py-2 font-medium text-[var(--tenant-accent-text)] transition hover:text-[var(--tenant-accent-text)]"
+                    : "border-b border-transparent pb-1 transition hover:border-[var(--tenant-accent-bg)] hover:text-[var(--header-link-hover)]"
+                }
                 href={link.href}
                 key={link.href}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
-        <div className="flex flex-col justify-center">
-          <p className="mb-5 w-fit rounded-full border border-[var(--border-subtle)] bg-[var(--hero-pill-bg)] px-4 py-2 text-sm font-medium text-[var(--hero-pill-text)]">
+      <section className="mx-auto max-w-[90rem] px-4 pb-12 pt-10 sm:px-6 lg:px-8 lg:pb-16">
+        <div className="flex flex-col gap-9">
+          <h1 className="max-w-7xl font-serif text-[4.08rem] font-semibold uppercase leading-[0.84] tracking-normal text-balance sm:text-[5.95rem] lg:text-[8.16rem]">
+            Keep web updates clear, current, and easy to scan.
+          </h1>
+
+          <p className="w-fit rounded-full border border-[var(--border-subtle)] bg-[var(--hero-pill-bg)] px-4 py-2 text-sm font-medium text-[var(--hero-pill-text)]">
             Release notes and website changes
           </p>
-          <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] tracking-normal text-balance sm:text-6xl lg:text-7xl">
-            Sysnotes by JFL keeps product updates clear, current, and easy to
-            scan.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-muted-5)]">
-            A minimalist changelog website for teams that need to publish
-            releases, explain web updates, and keep customers aligned without
-            visual clutter.
-          </p>
-        </div>
 
-        <aside
-          aria-label="Latest release"
-          className="self-end border border-[var(--border-subtle)] bg-[var(--hero-card-bg)] p-6 shadow-[var(--hero-card-shadow)]"
-        >
-          <div className="flex items-start justify-between gap-6">
-            <div>
-              <p className="text-sm font-medium text-[var(--text-muted-2)]">
-                Latest
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-normal">
-                {releaseNotes[0].version}
-              </h2>
+          <aside
+            aria-label="Latest release"
+            className="grid overflow-hidden rounded-lg border border-[var(--border-light)] bg-[var(--hero-card-bg)] shadow-[var(--hero-card-shadow)] lg:min-h-[27rem] lg:grid-cols-[0.9fr_1.1fr]"
+          >
+            <div className="flex flex-col justify-between border-t-4 border-[var(--tenant-accent-bg)] p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-6">
+                <div>
+                  <p className="text-sm font-medium text-[var(--text-muted-2)]">
+                    Latest
+                  </p>
+                  <Link
+                    className="mt-2 block text-3xl font-semibold tracking-normal transition hover:text-[var(--text-muted-7)]"
+                    href={getReleasePath(releaseNotes[0].version)}
+                  >
+                    {releaseNotes[0].version}
+                  </Link>
+                </div>
+                <span className="rounded-full bg-[var(--hero-badge-bg)] px-3 py-1 text-sm font-medium text-[var(--hero-badge-text)]">
+                  Live
+                </span>
+              </div>
+              <div className="mt-12">
+                <Link
+                  className="block text-3xl font-semibold tracking-normal transition hover:text-[var(--text-muted-7)] sm:text-4xl"
+                  href={getReleasePath(releaseNotes[0].version)}
+                >
+                  {releaseNotes[0].title}
+                </Link>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--release-summary-color)]">
+                  {releaseNotes[0].summary}
+                </p>
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-muted-5)]">
+                  A minimalist changelog website for teams that need to publish
+                  releases, explain web updates, and keep customers aligned
+                  without visual clutter.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {releaseNotes[0].tags.map((tag) => (
+                    <span
+                      className="rounded-full bg-[var(--release-tag-bg)] px-3 py-1 text-sm text-[var(--release-tag-text)]"
+                      key={tag}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-            <span className="rounded-full bg-[var(--hero-badge-bg)] px-3 py-1 text-sm font-medium text-[var(--hero-badge-text)]">
-              Live
-            </span>
-          </div>
-          <h3 className="mt-8 text-2xl font-semibold tracking-normal">
-            {releaseNotes[0].title}
-          </h3>
-          <p className="mt-3 text-base leading-7 text-[var(--release-summary-color)]">
-            {releaseNotes[0].summary}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-2">
-            {releaseNotes[0].tags.map((tag) => (
-              <span
-                className="border border-[var(--border-subtle)] px-3 py-1 text-sm text-[var(--release-summary-color)]"
-                key={tag}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </aside>
+
+            <div className="relative hidden border-l border-[var(--border-subtle)] bg-[var(--surface-page)] p-8 lg:block">
+              <div className="absolute inset-8 grid grid-cols-[1fr_0.65fr] gap-4 opacity-80 blur-sm">
+                <div className="space-y-4">
+                  <div className="h-14 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)]" />
+                  <div className="h-24 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]" />
+                  <div className="h-20 rounded-lg border border-[var(--border-subtle)] bg-[var(--tenant-accent-bg)]" />
+                  <div className="h-28 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]" />
+                </div>
+                <div className="space-y-4 pt-12">
+                  <div className="h-28 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]" />
+                  <div className="h-20 rounded-full border border-[var(--border-subtle)] bg-[var(--tenant-accent-bg)]" />
+                  <div className="h-24 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]" />
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
       </section>
 
       <section
-        className="mx-auto grid max-w-7xl gap-6 px-5 pb-12 sm:px-8 lg:grid-cols-3"
+        className="mx-auto grid max-w-[90rem] gap-0 px-4 pb-16 sm:px-6 lg:grid-cols-3 lg:px-8"
         id="summary"
       >
         {metrics.map((metric) => (
           <div
-            className="border-t border-[var(--metric-border)] py-6"
+            className="border-t border-[var(--metric-border)] py-6 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0"
             key={metric.label}
           >
             <p className="text-4xl font-semibold tracking-normal text-[var(--metric-value-color)]">
@@ -162,11 +192,108 @@ export default function Home() {
         ))}
       </section>
 
+      <section className="mx-auto max-w-[90rem] px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-4xl font-semibold leading-tight tracking-normal sm:text-5xl">
+            Enterprise-grade release intelligence
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-[var(--text-muted-5)]">
+            Sysnotes scales with your team, offering the structure, review
+            controls, and publishing clarity modern changelog workflows need.
+          </p>
+          <Link
+            className="mt-6 inline-flex rounded-full bg-[var(--tag-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:text-[var(--text-muted-7)]"
+            href="#release-notes"
+          >
+            Learn more
+          </Link>
+        </div>
+
+        <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,15rem)_minmax(22rem,1fr)_minmax(0,15rem)] lg:items-center">
+          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-1">
+            {intelligenceFeatures.slice(0, 2).map((feature) => (
+              <article key={feature.label}>
+                <div className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] font-mono text-xs text-[var(--text-muted-5)]">
+                  {feature.mark}
+                </div>
+                <h3 className="mt-4 text-xl font-semibold tracking-normal">
+                  {feature.label}
+                </h3>
+                <p className="mt-4 text-base leading-7 text-[var(--text-muted-5)]">
+                  {feature.copy}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          <div className="relative min-h-[24rem] overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            <div className="absolute -left-16 top-10 h-24 w-[44rem] rotate-[-18deg] rounded-full bg-[var(--accent-bg)] opacity-80" />
+            <div className="absolute -right-16 bottom-10 h-24 w-[44rem] rotate-[-18deg] rounded-full bg-[var(--accent-bg)] opacity-60" />
+            <div className="absolute left-1/2 top-1/2 grid w-[76%] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border border-[var(--border-light)] bg-[var(--surface-page)] p-5 sm:grid-cols-[0.9fr_1.1fr]">
+              <div className="grid grid-cols-2 gap-2">
+                {["Draft", "Review", "Live", "Share"].map((item) => (
+                  <div
+                    className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3 text-center text-xs font-medium text-[var(--text-muted-5)]"
+                    key={item}
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                <p className="text-xs uppercase tracking-[0.16em] text-[var(--text-muted-1)]">
+                  Compliance
+                </p>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="grid aspect-square place-items-center rounded-full border border-[var(--border-subtle)] text-center text-xs font-semibold text-[var(--text-muted-6)]">
+                    SOC 2
+                  </div>
+                  <div className="grid aspect-square place-items-center rounded-full border border-[var(--border-subtle)] text-center text-xs font-semibold text-[var(--text-muted-6)]">
+                    ISO
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:col-span-2">
+                <p className="text-xs uppercase tracking-[0.16em] text-[var(--text-muted-1)]">
+                  Release audience
+                </p>
+                <div className="mt-4 flex -space-x-2">
+                  {["A", "B", "C", "D"].map((item) => (
+                    <span
+                      className="grid h-9 w-9 place-items-center rounded-full border border-[var(--surface-card)] bg-[var(--tag-bg)] text-xs font-semibold text-[var(--text-muted-6)]"
+                      key={item}
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-1">
+            {intelligenceFeatures.slice(2).map((feature) => (
+              <article key={feature.label}>
+                <div className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] font-mono text-xs text-[var(--text-muted-5)]">
+                  {feature.mark}
+                </div>
+                <h3 className="mt-4 text-xl font-semibold tracking-normal">
+                  {feature.label}
+                </h3>
+                <p className="mt-4 text-base leading-7 text-[var(--text-muted-5)]">
+                  {feature.copy}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section
-        className="border-y border-[var(--release-divider)] bg-[var(--release-section-bg)] py-16"
+        className="border-y border-[var(--release-divider)] bg-[var(--release-section-bg)] py-20 lg:py-24"
         id="release-notes"
       >
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--text-muted-1)]">
@@ -182,44 +309,42 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-10 divide-y divide-[var(--release-divider)] border-y border-[var(--release-divider)]">
-            {releaseNotes.map((note) => (
-              <article
-                className="grid gap-6 py-8 lg:grid-cols-[180px_1fr_260px]"
-                key={note.version}
+          <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_16rem]">
+            <div>
+              <TagFilter releases={releaseNotes} />
+            </div>
+
+            <aside className="hidden self-start rounded-lg border border-[var(--border-light)] bg-[var(--surface-page)] p-5 lg:block">
+              <p className="font-semibold">{releaseNotes[1].version}</p>
+              <p className="mt-1 text-sm text-[var(--release-date-color)]">
+                {releaseNotes[1].date}
+              </p>
+              <Link
+                className="mt-8 block text-2xl font-semibold tracking-normal transition hover:text-[var(--text-muted-7)]"
+                href={getReleasePath(releaseNotes[1].version)}
               >
-                <div>
-                  <p className="font-semibold">{note.version}</p>
-                  <p className="mt-1 text-sm text-[var(--release-date-color)]">
-                    {note.date}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-semibold tracking-normal">
-                    {note.title}
-                  </h3>
-                  <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--release-summary-color)]">
-                    {note.summary}
-                  </p>
-                </div>
-                <div className="flex flex-wrap content-start gap-2 lg:justify-end">
-                  {note.tags.map((tag) => (
-                    <span
-                      className="rounded-full bg-[var(--release-tag-bg)] px-3 py-1 text-sm text-[var(--release-tag-text)]"
-                      key={`${note.version}-${tag}`}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            ))}
+                {releaseNotes[1].title}
+              </Link>
+              <p className="mt-3 text-sm leading-6 text-[var(--release-summary-color)]">
+                {releaseNotes[1].summary}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {releaseNotes[1].tags.map((tag) => (
+                  <span
+                    className="rounded-full bg-[var(--release-tag-bg)] px-3 py-1 text-sm text-[var(--release-tag-text)]"
+                    key={`featured-${tag}`}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </aside>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8" id="web-changes">
-        <div className="grid gap-8 lg:grid-cols-[0.7fr_1fr]">
+      <section className="mx-auto max-w-[90rem] px-4 py-16 sm:px-6 lg:px-8 lg:py-24" id="web-changes">
+        <div className="border-t border-[var(--release-divider)] pt-10">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--text-muted-1)]">
               Website
@@ -228,10 +353,10 @@ export default function Home() {
               Web changes
             </h2>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {webChanges.map((item) => (
               <article
-                className="border border-[var(--card-border)] bg-[var(--card-bg)] p-5"
+                className="min-h-40 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-5"
                 key={item.label}
               >
                 <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--card-label-color)]">
@@ -247,11 +372,11 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-[var(--footer-border)] bg-[var(--footer-bg)]">
-        <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 text-sm text-[var(--footer-text)] sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+        <div className="mx-auto grid max-w-[90rem] gap-5 px-4 py-6 text-sm text-[var(--footer-text)] sm:px-6 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:px-8">
           <div>
-            <a className="text-lg tracking-normal text-[var(--text-primary)]" href="#">
-              <BrandWordmark />
-            </a>
+            <Link className="text-lg tracking-normal text-[var(--text-primary)]" href="/">
+              <TenantWordmark />
+            </Link>
             <p className="mt-2">Copyright {year} JFL. All rights reserved.</p>
           </div>
 
@@ -260,13 +385,13 @@ export default function Home() {
             className="flex flex-wrap gap-x-5 gap-y-2 text-[var(--footer-link-color)]"
           >
             {navLinks.map((link) => (
-              <a
+              <Link
                 className="transition hover:text-[var(--footer-link-hover)]"
                 href={link.href}
                 key={`footer-${link.href}`}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
 

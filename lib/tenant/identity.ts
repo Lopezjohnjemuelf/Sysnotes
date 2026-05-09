@@ -1,24 +1,26 @@
+import type { TenantIdentity } from "@/lib/types";
+
 export const MAX_LOGO_SIZE_BYTES = 512 * 1024;
 
-export type TenantIdentity = {
-  brandName: string;
-  logoUrl: string | null;
-  accentBg: string;
-  accentText: string;
-};
-
 export type IdentityFormErrors = Partial<
-  Record<"brandName" | "logo" | "accentBg", string>
+  Record<"slug" | "brandName" | "logo" | "accentBg" | "accentText", string>
 >;
 
 export const DEFAULT_TENANT_IDENTITY: TenantIdentity = {
+  slug: "sysnotes",
   brandName: "Sysnotes by JFL",
   logoUrl: null,
   accentBg: "#d7ef7d",
   accentText: "#263400",
+  colorScheme: "light",
+  fontFamily: "sans",
+  badgePosition: "right",
+  comingSoon: false,
+  webhookUrl: "",
 };
 
 export const TENANT_IDENTITY_STORAGE_KEY = "sysnotes:tenant-identity:v1";
+export const TENANT_SLUG_PATTERN = /^[a-z0-9-]+$/;
 
 export function normalizeHexColor(value: string) {
   const trimmed = value.trim();
@@ -56,16 +58,31 @@ export function normalizeTenantIdentity(
   identity: TenantIdentity,
 ): TenantIdentity | null {
   const accentBg = normalizeHexColor(identity.accentBg);
+  const accentText = normalizeHexColor(identity.accentText);
+  const slug = identity.slug.trim();
 
-  if (!identity.brandName.trim() || !accentBg) {
+  if (
+    !slug ||
+    !TENANT_SLUG_PATTERN.test(slug) ||
+    !identity.brandName.trim() ||
+    !accentBg ||
+    !accentText
+  ) {
     return null;
   }
 
   return {
+    slug,
     brandName: identity.brandName.trim(),
-    logoUrl: identity.logoUrl,
+    logoUrl: identity.logoUrl?.trim() || null,
     accentBg,
-    accentText: getReadableTextColor(accentBg),
+    accentText,
+    colorScheme: identity.colorScheme ?? DEFAULT_TENANT_IDENTITY.colorScheme,
+    fontFamily: identity.fontFamily ?? DEFAULT_TENANT_IDENTITY.fontFamily,
+    badgePosition:
+      identity.badgePosition ?? DEFAULT_TENANT_IDENTITY.badgePosition,
+    comingSoon: identity.comingSoon ?? DEFAULT_TENANT_IDENTITY.comingSoon,
+    webhookUrl: identity.webhookUrl?.trim() || "",
   };
 }
 
@@ -77,6 +94,10 @@ export function parseStoredTenantIdentity(value: string | null) {
   try {
     const parsed = JSON.parse(value) as Partial<TenantIdentity>;
     const candidate: TenantIdentity = {
+      slug:
+        typeof parsed.slug === "string"
+          ? parsed.slug
+          : DEFAULT_TENANT_IDENTITY.slug,
       brandName:
         typeof parsed.brandName === "string"
           ? parsed.brandName
@@ -90,10 +111,19 @@ export function parseStoredTenantIdentity(value: string | null) {
         typeof parsed.accentText === "string"
           ? parsed.accentText
           : DEFAULT_TENANT_IDENTITY.accentText,
+      colorScheme: parsed.colorScheme,
+      fontFamily: parsed.fontFamily,
+      badgePosition: parsed.badgePosition,
+      comingSoon: parsed.comingSoon,
+      webhookUrl:
+        typeof parsed.webhookUrl === "string"
+          ? parsed.webhookUrl
+          : DEFAULT_TENANT_IDENTITY.webhookUrl,
     };
 
     return normalizeTenantIdentity(candidate) ?? DEFAULT_TENANT_IDENTITY;
-  } catch {
+  } catch (err) {
+    console.warn(err);
     return DEFAULT_TENANT_IDENTITY;
   }
 }
@@ -105,8 +135,18 @@ export function validateIdentity(identity: TenantIdentity): IdentityFormErrors {
     errors.brandName = "Brand name is required.";
   }
 
+  if (!identity.slug.trim()) {
+    errors.slug = "Page slug is required.";
+  } else if (!TENANT_SLUG_PATTERN.test(identity.slug.trim())) {
+    errors.slug = "Use lowercase letters, numbers, and hyphens only.";
+  }
+
   if (!normalizeHexColor(identity.accentBg)) {
     errors.accentBg = "Enter a valid hex color.";
+  }
+
+  if (!normalizeHexColor(identity.accentText)) {
+    errors.accentText = "Enter a valid hex color.";
   }
 
   return errors;

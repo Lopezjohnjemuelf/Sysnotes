@@ -33,6 +33,7 @@
   --text-muted-5: var(--color-ink-opacity-62);
   --text-muted-6: var(--color-ink-opacity-65);
   --text-muted-7: var(--color-ink-opacity-70);
+  --error-text: var(--text-primary);
   --border-subtle: var(--color-border-subtle);
   --border-light: var(--color-border-light);
   --accent-bg: var(--color-lime-300);
