@@ -19,8 +19,7 @@ export const DEFAULT_TENANT_IDENTITY: TenantIdentity = {
   webhookUrl: "",
 };
 
-export const TENANT_IDENTITY_STORAGE_KEY = "sysnotes:tenant-identity:v1";
-export const TENANT_SLUG_PATTERN = /^[a-z0-9-]+$/;
+export const TENANT_SLUG_PATTERN = /^[a-z0-9-]{1,60}$/;
 
 export function normalizeHexColor(value: string) {
   const trimmed = value.trim();
@@ -84,48 +83,6 @@ export function normalizeTenantIdentity(
     comingSoon: identity.comingSoon ?? DEFAULT_TENANT_IDENTITY.comingSoon,
     webhookUrl: identity.webhookUrl?.trim() || "",
   };
-}
-
-export function parseStoredTenantIdentity(value: string | null) {
-  if (!value) {
-    return DEFAULT_TENANT_IDENTITY;
-  }
-
-  try {
-    const parsed = JSON.parse(value) as Partial<TenantIdentity>;
-    const candidate: TenantIdentity = {
-      slug:
-        typeof parsed.slug === "string"
-          ? parsed.slug
-          : DEFAULT_TENANT_IDENTITY.slug,
-      brandName:
-        typeof parsed.brandName === "string"
-          ? parsed.brandName
-          : DEFAULT_TENANT_IDENTITY.brandName,
-      logoUrl: typeof parsed.logoUrl === "string" ? parsed.logoUrl : null,
-      accentBg:
-        typeof parsed.accentBg === "string"
-          ? parsed.accentBg
-          : DEFAULT_TENANT_IDENTITY.accentBg,
-      accentText:
-        typeof parsed.accentText === "string"
-          ? parsed.accentText
-          : DEFAULT_TENANT_IDENTITY.accentText,
-      colorScheme: parsed.colorScheme,
-      fontFamily: parsed.fontFamily,
-      badgePosition: parsed.badgePosition,
-      comingSoon: parsed.comingSoon,
-      webhookUrl:
-        typeof parsed.webhookUrl === "string"
-          ? parsed.webhookUrl
-          : DEFAULT_TENANT_IDENTITY.webhookUrl,
-    };
-
-    return normalizeTenantIdentity(candidate) ?? DEFAULT_TENANT_IDENTITY;
-  } catch (err) {
-    console.warn(err);
-    return DEFAULT_TENANT_IDENTITY;
-  }
 }
 
 export function validateIdentity(identity: TenantIdentity): IdentityFormErrors {

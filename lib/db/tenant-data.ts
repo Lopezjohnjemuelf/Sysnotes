@@ -1,27 +1,27 @@
 import "server-only";
 
-import { read } from "@/lib/db/file-store";
+import { read, safeFilename } from "@/lib/db/file-store";
 import { normalizeRelease } from "@/lib/releases/persistence";
 import {
   normalizeTenantIdentity,
-  TENANT_SLUG_PATTERN,
 } from "@/lib/tenant/identity";
 import type { Release, TenantIdentity } from "@/lib/types";
+import { validateSlug } from "@/lib/validate";
 
 export function tenantIdentityFile(slug: string) {
-  return `tenant-${slug}.json`;
+  return `tenant-${safeFilename(slug)}.json`;
 }
 
 export function tenantReleasesFile(slug: string) {
-  return `releases-${slug}.json`;
+  return `releases-${safeFilename(slug)}.json`;
 }
 
 export function tenantSubscribersFile(slug: string) {
-  return `subscribers-${slug}.json`;
+  return `subscribers-${safeFilename(slug)}.json`;
 }
 
 export function isValidTenantSlug(slug: string) {
-  return TENANT_SLUG_PATTERN.test(slug);
+  return validateSlug(slug);
 }
 
 export function readTenantIdentity(slug: string): TenantIdentity | null {

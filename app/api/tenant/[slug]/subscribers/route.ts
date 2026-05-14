@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
   isValidTenantSlug,
   tenantSubscribersFile,
 } from "@/lib/db/tenant-data";
 import { read, write } from "@/lib/db/file-store";
+import { rateLimit } from "@/lib/rate-limit";
 import type { Subscriber } from "@/lib/types";
 
 type TenantSubscribersRouteContext = {
@@ -13,19 +14,45 @@ type TenantSubscribersRouteContext = {
 };
 
 function readSubscribers(slug: string) {
-  return read<Subscriber[]>(tenantSubscribersFile(slug)) ?? [];
+  const subscribers = read<Subscriber[]>(tenantSubscribersFile(slug)) ?? [];
+
+  return Array.isArray(subscribers) ? subscribers : [];
 }
 
 function isJsonRequest(request: Request) {
   return request.headers.get("content-type")?.includes("application/json");
 }
 
+function getClientIp(request: NextRequest) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || "unknown";
+  }
+
+  return (request as NextRequest & { ip?: string }).ip ?? "unknown";
+}
+
 function invalidJsonResponse() {
-  return NextResponse.json({ error: "Content-Type must be application/json." }, { status: 415 });
+  return NextResponse.json(
+    { error: "Content-Type must be application/json." },
+    { status: 415 },
+  );
 }
 
 function invalidSlugResponse() {
   return NextResponse.json({ error: "Tenant not found." }, { status: 404 });
+}
+
+function normalizeEmail(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const email = value.trim().toLowerCase();
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return emailPattern.test(email) ? email : null;
 }
 
 function normalizeSubscriber(value: unknown, slug: string): Subscriber | null {
@@ -34,13 +61,14 @@ function normalizeSubscriber(value: unknown, slug: string): Subscriber | null {
   }
 
   const subscriber = value as Partial<Subscriber>;
+  const email = normalizeEmail(subscriber.email);
 
-  if (typeof subscriber.email !== "string" || !subscriber.email.includes("@")) {
+  if (!email) {
     return null;
   }
 
   return {
-    email: subscriber.email.trim().toLowerCase(),
+    email,
     slug,
     subscribedAt:
       typeof subscriber.subscribedAt === "string"
@@ -49,7 +77,10 @@ function normalizeSubscriber(value: unknown, slug: string): Subscriber | null {
   };
 }
 
-export async function GET(_request: Request, { params }: TenantSubscribersRouteContext) {
+export async function GET(
+  _request: Request,
+  { params }: TenantSubscribersRouteContext,
+) {
   const { slug } = await params;
 
   if (!isValidTenantSlug(slug)) {
@@ -59,8 +90,18 @@ export async function GET(_request: Request, { params }: TenantSubscribersRouteC
   return NextResponse.json(readSubscribers(slug));
 }
 
-export async function POST(request: Request, { params }: TenantSubscribersRouteContext) {
+export async function POST(
+  request: NextRequest,
+  { params }: TenantSubscribersRouteContext,
+) {
   const { slug } = await params;
+  const ip = getClientIp(request);
+  const route = `/api/tenant/${slug}/subscribers`;
+  const limit = await rateLimit(`${ip}:${route}`, 3, 300);
+
+  if (!limit.allowed) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+  }
 
   if (!isValidTenantSlug(slug)) {
     return invalidSlugResponse();
@@ -77,6 +118,18 @@ export async function POST(request: Request, { params }: TenantSubscribersRouteC
   }
 
   const subscribers = readSubscribers(slug);
+  const hasDuplicate = subscribers.some(
+    (currentSubscriber) =>
+      currentSubscriber.email.trim().toLowerCase() === subscriber.email,
+  );
+
+  if (hasDuplicate) {
+    return NextResponse.json(
+      { error: "Subscriber already exists." },
+      { status: 409 },
+    );
+  }
+
   const nextSubscribers = [subscriber, ...subscribers];
 
   write(tenantSubscribersFile(slug), nextSubscribers);

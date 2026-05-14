@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TenantWordmark } from "@/components/admin";
+import { LandingFooter } from "@/components/landing-footer";
 import { LoginClient } from "./login-client";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ const navLinks = [
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[var(--surface-page)] text-[var(--text-primary)]">
+    <main className="flex min-h-screen flex-col bg-[var(--surface-page)] text-[var(--text-primary)]">
       <section className="sticky top-0 z-20 border-b border-[var(--header-border)] bg-[var(--header-bg)]">
         <div className="mx-auto flex max-w-[90rem] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link className="text-lg tracking-normal" href="/">
@@ -39,12 +40,9 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-[90rem] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_28rem] lg:px-8 lg:py-24">
+      <section className="mx-auto grid w-full max-w-[90rem] flex-1 gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_28rem] lg:px-8 lg:py-24">
         <div className="flex flex-col justify-between border-t border-[var(--border-light)] pt-8">
           <div>
-            <p className="w-fit rounded-full border border-[var(--border-subtle)] bg-[var(--hero-pill-bg)] px-4 py-2 text-sm font-medium text-[var(--hero-pill-text)]">
-              Login
-            </p>
             <h1 className="mt-8 max-w-4xl font-serif text-[4rem] font-semibold uppercase leading-[0.88] tracking-normal text-balance sm:text-[6rem] lg:text-[7.4rem]">
               Continue to Sysnotes.
             </h1>
@@ -57,6 +55,8 @@ export default function LoginPage() {
 
         <LoginClient />
       </section>
+
+      <LandingFooter />
     </main>
   );
 }

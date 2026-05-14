@@ -1,20 +1,29 @@
-import {
-  readPublishedTenantReleases,
-  readTenantIdentity,
-  readTenantReleases,
-} from "@/lib/db/tenant-data";
+import "server-only";
+
+import { getReleaseService } from "@/lib/releases/service";
+import { getTenantService } from "@/lib/tenant/service";
 import type { Release, TenantIdentity } from "@/lib/types";
+
+type TenantPageData = {
+  identity: TenantIdentity;
+  releases: Release[];
+};
+
+type ReleasePageData = TenantPageData & {
+  release: Release;
+};
 
 export async function loadTenantPage(
   slug: string,
-): Promise<{ identity: TenantIdentity; releases: Release[] } | null> {
-  const identity = readTenantIdentity(slug);
+): Promise<TenantPageData | null> {
+  const [identity, releases] = await Promise.all([
+    getTenantService(slug).load(),
+    getReleaseService(slug).getPublished(),
+  ]);
 
   if (!identity || identity.slug !== slug) {
     return null;
   }
-
-  const releases = readPublishedTenantReleases(slug);
 
   return { identity, releases };
 }
@@ -22,25 +31,21 @@ export async function loadTenantPage(
 export async function loadReleasePage(
   slug: string,
   version: string,
-): Promise<{ identity: TenantIdentity; release: Release } | null> {
-  const tenantPage = await loadTenantPage(slug);
+): Promise<ReleasePageData | null> {
+  const releaseService = getReleaseService(slug);
+  const [identity, release, releases] = await Promise.all([
+    getTenantService(slug).load(),
+    releaseService.getById(version),
+    releaseService.getAll(),
+  ]);
 
-  if (!tenantPage) {
-    return null;
-  }
-
-  const release =
-    readTenantReleases(slug).find(
-      (currentRelease) =>
-        currentRelease.id === version || currentRelease.version === version,
-    ) ?? null;
-
-  if (!release) {
+  if (!identity || identity.slug !== slug || !release) {
     return null;
   }
 
   return {
-    identity: tenantPage.identity,
+    identity,
     release,
+    releases,
   };
 }

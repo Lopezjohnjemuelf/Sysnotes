@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TenantWordmark } from "@/components/admin";
+import { LandingFooter } from "@/components/landing-footer";
 
 export const metadata: Metadata = {
   title: "About | Sysnotes by JFL",
@@ -14,7 +15,7 @@ const navLinks = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[var(--surface-page)] text-[var(--text-primary)]">
+    <main className="flex min-h-screen flex-col bg-[var(--surface-page)] text-[var(--text-primary)]">
       <section className="sticky top-0 z-20 border-b border-[var(--header-border)] bg-[var(--header-bg)]">
         <div className="mx-auto flex max-w-[90rem] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link className="text-lg tracking-normal" href="/">
@@ -38,7 +39,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[90rem] px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
             <p className="w-fit rounded-full border border-[var(--border-subtle)] bg-[var(--hero-pill-bg)] px-4 py-2 text-sm font-medium text-[var(--hero-pill-text)]">
@@ -78,6 +79,8 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      <LandingFooter />
     </main>
   );
 }

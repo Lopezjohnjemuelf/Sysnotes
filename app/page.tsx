@@ -6,7 +6,9 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import { TenantWordmark } from "@/components/admin";
+import { LandingMotion } from "@/components/landing-motion";
 import { TagFilter } from "@/components/tag-filter";
 import { getReleasePath, releaseNotes } from "@/data/releases";
 
@@ -71,19 +73,34 @@ export default function Home() {
   const year = new Date().getFullYear();
 
   return (
-    <main className="min-h-screen bg-[var(--surface-page)] text-[var(--text-primary)]">
+    <main className="landing-motion-surface min-h-screen bg-[var(--surface-page)] text-[var(--text-primary)]">
+      <LandingMotion />
       <section className="sticky top-0 z-20 border-b border-[var(--header-border)] bg-[var(--header-bg)]">
         <div className="mx-auto flex max-w-[90rem] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link className="text-lg tracking-normal" href="/">
-            <TenantWordmark />
+          <Link
+            aria-label="Sysnotes home"
+            className="landing-link flex items-center gap-3"
+            href="/"
+          >
+            <Image
+              alt=""
+              className="h-9 w-9 rounded-full object-cover ring-1 ring-[var(--border-subtle)]"
+              height={36}
+              priority
+              src="/sysnotes-logo.jpg"
+              width={36}
+            />
+            <span className="text-lg tracking-normal">
+              <TenantWordmark />
+            </span>
           </Link>
           <nav className="flex items-center gap-3 text-sm text-[var(--header-link-color)] sm:gap-8">
             {navLinks.map((link) => (
               <Link
                 className={
                   link.label === "Login"
-                    ? "rounded-full bg-[var(--tenant-accent-bg)] px-4 py-2 font-medium text-[var(--tenant-accent-text)] transition hover:text-[var(--tenant-accent-text)]"
-                    : "border-b border-transparent pb-1 transition hover:border-[var(--tenant-accent-bg)] hover:text-[var(--header-link-hover)]"
+                    ? "landing-button rounded-full bg-[var(--tenant-accent-bg)] px-4 py-2 font-medium text-[var(--tenant-accent-text)] hover:text-[var(--tenant-accent-text)]"
+                    : "landing-link border-b border-transparent pb-1 hover:border-[var(--tenant-accent-bg)] hover:text-[var(--header-link-hover)]"
                 }
                 href={link.href}
                 key={link.href}
@@ -97,17 +114,17 @@ export default function Home() {
 
       <section className="mx-auto max-w-[90rem] px-4 pb-12 pt-10 sm:px-6 lg:px-8 lg:pb-16">
         <div className="flex flex-col gap-9">
-          <h1 className="max-w-7xl font-serif text-[4.08rem] font-semibold uppercase leading-[0.84] tracking-normal text-balance sm:text-[5.95rem] lg:text-[8.16rem]">
+          <h1 className="landing-hero-title max-w-7xl font-serif text-[4.08rem] font-semibold uppercase leading-[0.84] tracking-normal text-balance sm:text-[5.95rem] lg:text-[8.16rem]">
             Keep web updates clear, current, and easy to scan.
           </h1>
 
-          <p className="w-fit rounded-full border border-[var(--border-subtle)] bg-[var(--hero-pill-bg)] px-4 py-2 text-sm font-medium text-[var(--hero-pill-text)]">
+          <p className="landing-hero-pill w-fit rounded-full border border-[var(--border-subtle)] bg-[var(--hero-pill-bg)] px-4 py-2 text-sm font-medium text-[var(--hero-pill-text)]">
             Release notes and website changes
           </p>
 
           <aside
             aria-label="Latest release"
-            className="grid overflow-hidden rounded-lg border border-[var(--border-light)] bg-[var(--hero-card-bg)] shadow-[var(--hero-card-shadow)] lg:min-h-[27rem] lg:grid-cols-[0.9fr_1.1fr]"
+            className="landing-hero-card grid overflow-hidden rounded-lg border border-[var(--border-light)] bg-[var(--hero-card-bg)] shadow-[var(--hero-card-shadow)] lg:min-h-[27rem] lg:grid-cols-[0.9fr_1.1fr]"
           >
             <div className="flex flex-col justify-between border-t-4 border-[var(--tenant-accent-bg)] p-6 sm:p-8">
               <div className="flex items-start justify-between gap-6">
@@ -116,7 +133,7 @@ export default function Home() {
                     Latest
                   </p>
                   <Link
-                    className="mt-2 block text-3xl font-semibold tracking-normal transition hover:text-[var(--text-muted-7)]"
+                    className="landing-link mt-2 block text-3xl font-semibold tracking-normal hover:text-[var(--text-muted-7)]"
                     href={getReleasePath(releaseNotes[0].version)}
                   >
                     {releaseNotes[0].version}
@@ -128,7 +145,7 @@ export default function Home() {
               </div>
               <div className="mt-12">
                 <Link
-                  className="block text-3xl font-semibold tracking-normal transition hover:text-[var(--text-muted-7)] sm:text-4xl"
+                  className="landing-link block text-3xl font-semibold tracking-normal hover:text-[var(--text-muted-7)] sm:text-4xl"
                   href={getReleasePath(releaseNotes[0].version)}
                 >
                   {releaseNotes[0].title}
@@ -155,7 +172,7 @@ export default function Home() {
             </div>
 
             <div className="relative hidden border-l border-[var(--border-subtle)] bg-[var(--surface-page)] p-8 lg:block">
-              <div className="absolute inset-8 grid grid-cols-[1fr_0.65fr] gap-4 opacity-80 blur-sm">
+              <div className="landing-visual-float absolute inset-8 grid grid-cols-[1fr_0.65fr] gap-4 opacity-80 blur-sm">
                 <div className="space-y-4">
                   <div className="h-14 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)]" />
                   <div className="h-24 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]" />
@@ -179,7 +196,8 @@ export default function Home() {
       >
         {metrics.map((metric) => (
           <div
-            className="border-t border-[var(--metric-border)] py-6 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0"
+            className="landing-card-motion border-t border-[var(--metric-border)] py-6 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0"
+            data-landing-reveal
             key={metric.label}
           >
             <p className="text-4xl font-semibold tracking-normal text-[var(--metric-value-color)]">
@@ -192,7 +210,10 @@ export default function Home() {
         ))}
       </section>
 
-      <section className="mx-auto max-w-[90rem] px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+      <section
+        className="mx-auto max-w-[90rem] px-4 py-20 sm:px-6 lg:px-8 lg:py-24"
+        data-landing-reveal
+      >
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-semibold leading-tight tracking-normal sm:text-5xl">
             Enterprise-grade release intelligence
@@ -202,7 +223,7 @@ export default function Home() {
             controls, and publishing clarity modern changelog workflows need.
           </p>
           <Link
-            className="mt-6 inline-flex rounded-full bg-[var(--tag-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:text-[var(--text-muted-7)]"
+            className="landing-button mt-6 inline-flex rounded-full bg-[var(--tag-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--text-muted-7)]"
             href="#release-notes"
           >
             Learn more
@@ -212,7 +233,10 @@ export default function Home() {
         <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,15rem)_minmax(22rem,1fr)_minmax(0,15rem)] lg:items-center">
           <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-1">
             {intelligenceFeatures.slice(0, 2).map((feature) => (
-              <article key={feature.label}>
+              <article
+                className="landing-card-motion rounded-lg border border-transparent p-1"
+                key={feature.label}
+              >
                 <div className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] font-mono text-xs text-[var(--text-muted-5)]">
                   {feature.mark}
                 </div>
@@ -226,9 +250,9 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="relative min-h-[24rem] overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-            <div className="absolute -left-16 top-10 h-24 w-[44rem] rotate-[-18deg] rounded-full bg-[var(--accent-bg)] opacity-80" />
-            <div className="absolute -right-16 bottom-10 h-24 w-[44rem] rotate-[-18deg] rounded-full bg-[var(--accent-bg)] opacity-60" />
+          <div className="landing-card-motion relative min-h-[24rem] overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            <div className="landing-visual-drift absolute -left-16 top-10 h-24 w-[44rem] rounded-full bg-[var(--accent-bg)] opacity-80" />
+            <div className="landing-visual-drift absolute -right-16 bottom-10 h-24 w-[44rem] rounded-full bg-[var(--accent-bg)] opacity-60" />
             <div className="absolute left-1/2 top-1/2 grid w-[76%] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border border-[var(--border-light)] bg-[var(--surface-page)] p-5 sm:grid-cols-[0.9fr_1.1fr]">
               <div className="grid grid-cols-2 gap-2">
                 {["Draft", "Review", "Live", "Share"].map((item) => (
@@ -273,7 +297,10 @@ export default function Home() {
 
           <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-1">
             {intelligenceFeatures.slice(2).map((feature) => (
-              <article key={feature.label}>
+              <article
+                className="landing-card-motion rounded-lg border border-transparent p-1"
+                key={feature.label}
+              >
                 <div className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] font-mono text-xs text-[var(--text-muted-5)]">
                   {feature.mark}
                 </div>
@@ -291,6 +318,7 @@ export default function Home() {
 
       <section
         className="border-y border-[var(--release-divider)] bg-[var(--release-section-bg)] py-20 lg:py-24"
+        data-landing-reveal
         id="release-notes"
       >
         <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
@@ -314,13 +342,13 @@ export default function Home() {
               <TagFilter releases={releaseNotes} />
             </div>
 
-            <aside className="hidden self-start rounded-lg border border-[var(--border-light)] bg-[var(--surface-page)] p-5 lg:block">
+            <aside className="landing-card-motion hidden self-start rounded-lg border border-[var(--border-light)] bg-[var(--surface-page)] p-5 lg:block">
               <p className="font-semibold">{releaseNotes[1].version}</p>
               <p className="mt-1 text-sm text-[var(--release-date-color)]">
                 {releaseNotes[1].date}
               </p>
               <Link
-                className="mt-8 block text-2xl font-semibold tracking-normal transition hover:text-[var(--text-muted-7)]"
+                className="landing-link mt-8 block text-2xl font-semibold tracking-normal hover:text-[var(--text-muted-7)]"
                 href={getReleasePath(releaseNotes[1].version)}
               >
                 {releaseNotes[1].title}
@@ -343,7 +371,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[90rem] px-4 py-16 sm:px-6 lg:px-8 lg:py-24" id="web-changes">
+      <section
+        className="mx-auto max-w-[90rem] px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+        data-landing-reveal
+        id="web-changes"
+      >
         <div className="border-t border-[var(--release-divider)] pt-10">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--text-muted-1)]">
@@ -356,7 +388,7 @@ export default function Home() {
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {webChanges.map((item) => (
               <article
-                className="min-h-40 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-5"
+                className="landing-card-motion min-h-40 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-5"
                 key={item.label}
               >
                 <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--card-label-color)]">
@@ -386,7 +418,7 @@ export default function Home() {
           >
             {navLinks.map((link) => (
               <Link
-                className="transition hover:text-[var(--footer-link-hover)]"
+                className="landing-link hover:text-[var(--footer-link-hover)]"
                 href={link.href}
                 key={`footer-${link.href}`}
               >

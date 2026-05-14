@@ -10,15 +10,15 @@ export default function AdminNotFound() {
     <ErrorStateCard
       eyebrow="Admin 404"
       description="The page you requested does not exist in the Sysnotes admin portal. Check the URL or return to the admin dashboard."
-      icon="ti-map-question"
+      icon="settings"
       primaryAction={{
         href: "/admin/releases",
-        icon: "ti-layout-dashboard",
+        icon: "dashboard",
         label: "Go to dashboard",
       }}
       secondaryAction={{
         href: "/admin/identity",
-        icon: "ti-palette",
+        icon: "identity",
         label: "Configure tenant identity",
       }}
       title="This admin page does not exist"

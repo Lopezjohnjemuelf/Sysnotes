@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { isValidTenantSlug, tenantIdentityFile } from "@/lib/db/tenant-data";
 import { read, write } from "@/lib/db/file-store";
 import { normalizeTenantIdentity } from "@/lib/tenant/identity";
 import type { TenantIdentity } from "@/lib/types";
+import {
+  sanitizeString,
+  validateLogoUrl,
+  validateWebhookUrl,
+} from "@/lib/validate";
 
 type TenantIdentityRouteContext = {
   params: Promise<{
@@ -22,6 +28,31 @@ function invalidSlugResponse() {
   return NextResponse.json({ error: "Tenant not found." }, { status: 404 });
 }
 
+function sanitizeIdentity(identity: TenantIdentity): TenantIdentity | null {
+  const brandName = sanitizeString(identity.brandName, 80);
+  const logoUrl = identity.logoUrl ? identity.logoUrl.trim() : null;
+  const webhookUrl = identity.webhookUrl?.trim() ?? "";
+
+  if (!brandName) {
+    return null;
+  }
+
+  if (logoUrl && !validateLogoUrl(logoUrl)) {
+    return null;
+  }
+
+  if (webhookUrl && !validateWebhookUrl(webhookUrl)) {
+    return null;
+  }
+
+  return {
+    ...identity,
+    brandName,
+    logoUrl,
+    webhookUrl,
+  };
+}
+
 export async function GET(_request: Request, { params }: TenantIdentityRouteContext) {
   const { slug } = await params;
 
@@ -39,6 +70,12 @@ export async function GET(_request: Request, { params }: TenantIdentityRouteCont
 }
 
 export async function PUT(request: Request, { params }: TenantIdentityRouteContext) {
+  const session = await auth();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   const { slug } = await params;
 
   if (!isValidTenantSlug(slug)) {
@@ -49,7 +86,10 @@ export async function PUT(request: Request, { params }: TenantIdentityRouteConte
     return invalidJsonResponse();
   }
 
-  const identity = normalizeTenantIdentity(await request.json());
+  const normalizedIdentity = normalizeTenantIdentity(await request.json());
+  const identity = normalizedIdentity
+    ? sanitizeIdentity(normalizedIdentity)
+    : null;
 
   if (!identity || identity.slug !== slug) {
     return NextResponse.json({ error: "Invalid tenant identity." }, { status: 400 });

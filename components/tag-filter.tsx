@@ -35,8 +35,8 @@ export function TagFilter({ releases }: TagFilterProps) {
             <button
               className={
                 isActive
-                  ? "rounded-full bg-[var(--accent-bg)] px-3 py-1 text-sm font-medium text-[var(--accent-text)]"
-                  : "rounded-full bg-[var(--tag-bg)] px-3 py-1 text-sm text-[var(--text-muted-4)] transition hover:text-[var(--text-primary)]"
+                  ? "landing-button tag-filter-pill rounded-full bg-[var(--accent-bg)] px-3 py-1 text-sm font-medium text-[var(--accent-text)]"
+                  : "landing-button tag-filter-pill rounded-full bg-[var(--tag-bg)] px-3 py-1 text-sm text-[var(--text-muted-4)] hover:text-[var(--text-primary)]"
               }
               key={tag}
               onClick={() => setSelectedTag(tag)}
@@ -62,10 +62,10 @@ export function TagFilter({ releases }: TagFilterProps) {
               }
               key={note.version}
             >
-              <article className="grid gap-6 rounded-lg border border-[var(--release-divider)] bg-[var(--surface-page)] p-6 transition hover:border-[var(--border-light)] lg:grid-cols-[160px_1fr]">
+              <article className="landing-card-motion grid gap-6 rounded-lg border border-[var(--release-divider)] bg-[var(--surface-page)] p-6 hover:border-[var(--border-light)] lg:grid-cols-[160px_1fr]">
                 <div>
                   <Link
-                    className="font-semibold transition hover:text-[var(--text-muted-7)]"
+                    className="landing-link font-semibold hover:text-[var(--text-muted-7)]"
                     href={getReleasePath(note.version)}
                   >
                     {note.version}
@@ -76,7 +76,7 @@ export function TagFilter({ releases }: TagFilterProps) {
                 </div>
                 <div>
                   <Link
-                    className="block text-2xl font-semibold tracking-normal transition hover:text-[var(--text-muted-7)]"
+                    className="landing-link block text-2xl font-semibold tracking-normal hover:text-[var(--text-muted-7)]"
                     href={getReleasePath(note.version)}
                   >
                     {note.title}

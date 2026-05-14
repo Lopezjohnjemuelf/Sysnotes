@@ -4,7 +4,3 @@ export class NotImplementedError extends Error {
     this.name = "NotImplementedError";
   }
 }
-
-export function shouldUseTenantApi() {
-  return process.env.NEXT_PUBLIC_TENANT_API === "true";
-}

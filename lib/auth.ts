@@ -1,5 +1,6 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { env } from "@/lib/env";
 
 declare module "next-auth" {
   interface User {
@@ -15,6 +16,7 @@ declare module "next-auth" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       credentials: {
@@ -28,7 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (
           typeof password === "string" &&
-          password === process.env.ADMIN_PASSWORD
+          password === env.ADMIN_PASSWORD
         ) {
           return { id: "admin", role: "admin" };
         }

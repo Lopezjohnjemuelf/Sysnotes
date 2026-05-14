@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -441,11 +442,14 @@ export function BrandIdentityForm({
               </div>
               <div className="flex h-20 items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--surface-header)] px-4">
                 {identity.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     alt={`${identity.brandName} logo preview`}
                     className="max-h-10 max-w-full object-contain"
+                    height={40}
                     src={identity.logoUrl}
+                    style={{ objectFit: "contain" }}
+                    unoptimized
+                    width={40}
                   />
                 ) : (
                   <span className="text-sm font-semibold text-[var(--text-muted-5)]">
@@ -631,15 +635,15 @@ export function BrandIdentityForm({
           <div className="mt-4">
             <InlineErrorBanner
               description="The tenant identity could not be saved. Browser storage may be full or temporarily unavailable."
-              icon="ti-device-floppy-off"
+              icon="settings"
               primaryAction={{
-                icon: "ti-refresh",
+                icon: "settings",
                 label: "Retry",
                 onClick: () => formRef.current?.requestSubmit(),
               }}
               secondaryAction={{
                 href: "/admin/releases",
-                icon: "ti-notes",
+                icon: "release",
                 label: "Back to releases",
               }}
               title="Failed to save tenant identity"

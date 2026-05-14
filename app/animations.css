@@ -1,0 +1,591 @@
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-6px);
+  }
+
+  40% {
+    transform: translateX(6px);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes pulseSoft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes typewriter {
+  from {
+    max-width: 0;
+  }
+
+  to {
+    max-width: 30ch;
+  }
+}
+
+@keyframes caretBlink {
+  0%,
+  45% {
+    border-color: currentColor;
+  }
+
+  46%,
+  100% {
+    border-color: transparent;
+  }
+}
+
+@keyframes accentLine {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes landingAmbientDrift {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+
+  50% {
+    opacity: 0.52;
+    transform: translate3d(2%, 1%, 0) scale(1.02);
+  }
+}
+
+@keyframes landingHeroIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landingPanelFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes landingPanelDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-18deg);
+  }
+
+  50% {
+    transform: translate3d(10px, -6px, 0) rotate(-18deg);
+  }
+}
+
+@keyframes landingBorderSweep {
+  0% {
+    transform: translate3d(-120%, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(120%, 0, 0);
+  }
+}
+
+.anim-fade-up {
+  animation: fadeUp var(--transition-slow) both;
+}
+
+.anim-fade-in {
+  animation: fadeIn var(--transition-base) both;
+}
+
+.anim-scale-in {
+  animation: scaleIn var(--transition-base) both;
+}
+
+.anim-shake {
+  animation: shake 400ms ease;
+}
+
+.anim-pulse {
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+.subscribe-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
+  border-radius: 9999px;
+  animation: spin 600ms linear infinite;
+}
+
+.premium-button {
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.premium-button:active {
+  transform: translateY(0);
+}
+
+.premium-button:focus-visible,
+.premium-text-link:focus-visible,
+.premium-icon-link:focus-visible,
+.tag-filter-pill:focus-visible,
+.release-sidebar-link:focus-visible {
+  outline: 2px solid var(--tenant-accent-bg, var(--accent-bg));
+  outline-offset: 3px;
+}
+
+.premium-text-link {
+  position: relative;
+  transition:
+    color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.premium-text-link::after {
+  position: absolute;
+  right: 0;
+  bottom: 0.1em;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: currentColor;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.premium-card-hover {
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.premium-icon-link {
+  transition:
+    color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.typewriter-line {
+  display: inline-block;
+  max-width: 30ch;
+  overflow: hidden;
+  vertical-align: bottom;
+  white-space: nowrap;
+  border-right: 1px solid currentColor;
+  animation:
+    typewriter 1100ms steps(30, end) 520ms both,
+    caretBlink 700ms step-end 4;
+}
+
+.section-accent-line {
+  position: relative;
+}
+
+.section-accent-line::after {
+  display: block;
+  width: 4rem;
+  height: 2px;
+  margin-top: 1.25rem;
+  content: "";
+  background: var(--tenant-accent-bg, var(--accent-bg));
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: accentLine var(--transition-base) 560ms both;
+}
+
+.tag-filter-pill {
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.release-sidebar-link {
+  transition:
+    border-left-color var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.landing-motion-surface {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+}
+
+.landing-motion-surface::before,
+.landing-motion-surface::after {
+  position: fixed;
+  inset: auto;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--tenant-accent-bg, var(--accent-bg)) 32%, transparent)
+      0%,
+    transparent 68%
+  );
+  filter: blur(18px);
+  opacity: 0.36;
+  will-change: transform, opacity;
+  animation: landingAmbientDrift 14s ease-in-out infinite;
+}
+
+.landing-motion-surface::before {
+  top: 7rem;
+  right: -12rem;
+  width: min(38vw, 32rem);
+  height: min(38vw, 32rem);
+}
+
+.landing-motion-surface::after {
+  bottom: 12rem;
+  left: -14rem;
+  width: min(42vw, 36rem);
+  height: min(42vw, 36rem);
+  animation-delay: -6s;
+}
+
+.landing-motion-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-hero-title,
+.landing-hero-pill,
+.landing-hero-card {
+  animation: landingHeroIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-hero-title {
+  animation-delay: 80ms;
+}
+
+.landing-hero-pill {
+  animation-delay: 190ms;
+}
+
+.landing-hero-card {
+  position: relative;
+  animation-delay: 280ms;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+
+.landing-hero-card::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42%;
+  height: 1px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--tenant-accent-bg, var(--accent-bg)) 82%, white),
+    transparent
+  );
+  opacity: 0.8;
+  animation: landingBorderSweep 6s ease-in-out infinite;
+}
+
+.landing-visual-float {
+  will-change: transform;
+  animation: landingPanelFloat 7s ease-in-out infinite;
+}
+
+.landing-visual-drift {
+  will-change: transform;
+  animation: landingPanelDrift 10s ease-in-out infinite;
+}
+
+.landing-button {
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.landing-link {
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.landing-card-motion {
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.landing-card-motion::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  border: 1px solid transparent;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+[data-landing-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 560ms ease,
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-landing-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing-delay-1 {
+  --reveal-delay: 80ms;
+}
+
+.landing-delay-2 {
+  --reveal-delay: 160ms;
+}
+
+.landing-delay-3 {
+  --reveal-delay: 240ms;
+}
+
+.landing-delay-4 {
+  --reveal-delay: 320ms;
+}
+
+.reveal-card {
+  opacity: 0;
+  transform: translateY(20px) scale(1);
+  transition:
+    opacity var(--transition-slow),
+    transform var(--transition-slow);
+}
+
+.reveal-card.revealed {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--transition-base),
+    transform var(--transition-base);
+}
+
+.card-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.97);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.delay-1 {
+  animation-delay: 80ms;
+}
+
+.delay-2 {
+  animation-delay: 160ms;
+}
+
+.delay-3 {
+  animation-delay: 240ms;
+}
+
+.delay-4 {
+  animation-delay: 320ms;
+}
+
+.delay-5 {
+  animation-delay: 400ms;
+}
+
+@media (hover: hover) {
+  .premium-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .premium-text-link:hover {
+    opacity: 0.82;
+    transform: translateY(-1px);
+  }
+
+  .premium-text-link:hover::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .premium-icon-link:hover {
+    opacity: 0.84;
+    transform: translateY(-1px);
+  }
+
+  .premium-card-hover:hover {
+    border-color: var(--tenant-accent-bg, var(--accent-bg));
+    background-color: color-mix(
+      in srgb,
+      var(--tenant-accent-bg, var(--accent-bg)) 5%,
+      transparent
+    );
+    transform: translateY(-1px);
+  }
+
+  .release-sidebar-link:hover {
+    transform: translateY(-1px);
+  }
+
+  .landing-button:hover:not(:disabled) {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .landing-link:hover {
+    transform: translateY(-1px);
+  }
+
+  .landing-hero-card:hover,
+  .landing-card-motion:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--tenant-accent-bg, var(--accent-bg)) 72%,
+      var(--border-light)
+    );
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.07);
+    transform: translateY(-3px);
+  }
+
+  .landing-card-motion:hover::before {
+    opacity: 1;
+    border-color: color-mix(
+      in srgb,
+      var(--tenant-accent-bg, var(--accent-bg)) 55%,
+      transparent
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typewriter-line {
+    max-width: none;
+    border-right-color: transparent;
+  }
+
+  .landing-motion-surface::before,
+  .landing-motion-surface::after,
+  .landing-hero-title,
+  .landing-hero-pill,
+  .landing-hero-card,
+  .landing-hero-card::after,
+  .landing-visual-float,
+  .landing-visual-drift {
+    animation: none;
+  }
+
+  [data-landing-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}

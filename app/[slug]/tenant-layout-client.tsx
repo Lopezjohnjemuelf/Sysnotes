@@ -1,16 +1,28 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect } from "react";
-import { useTenantIdentity } from "@/components/admin";
+import { createContext, useContext, useEffect } from "react";
 import { TenantFooter, TenantHeader, getTenantTheme } from "@/components/tenant";
+import type { TenantIdentity } from "@/lib/types";
 
 type TenantLayoutProps = {
   children: ReactNode;
+  identity: TenantIdentity;
 };
 
-export function TenantLayoutClient({ children }: TenantLayoutProps) {
-  const identity = useTenantIdentity();
+const TenantContext = createContext<TenantIdentity | null>(null);
+
+export function useTenantContext() {
+  const identity = useContext(TenantContext);
+
+  if (!identity) {
+    throw new Error("useTenantContext must be used inside TenantLayoutClient.");
+  }
+
+  return identity;
+}
+
+export function TenantLayoutClient({ children, identity }: TenantLayoutProps) {
   const tenantTheme = getTenantTheme(identity);
 
   useEffect(() => {
@@ -29,11 +41,13 @@ export function TenantLayoutClient({ children }: TenantLayoutProps) {
 }`,
         }}
       />
-      <div style={{ fontFamily: "var(--tenant-font)" }}>
-        <TenantHeader identity={identity} />
-        {children}
-        <TenantFooter slug={identity.slug} />
-      </div>
+      <TenantContext.Provider value={identity}>
+        <div style={{ fontFamily: "var(--tenant-font)" }}>
+          <TenantHeader identity={identity} />
+          {children}
+          <TenantFooter slug={identity.slug} />
+        </div>
+      </TenantContext.Provider>
     </>
   );
 }

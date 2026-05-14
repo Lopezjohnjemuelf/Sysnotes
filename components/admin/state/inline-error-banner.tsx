@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { getIconComponent, type IconName } from "@/lib/icons";
 import {
   InlineActionLink,
   type AdminStateAction,
@@ -11,7 +12,7 @@ type InlineErrorBannerProps = {
   description: string;
   primaryAction: AdminStateAction;
   secondaryAction?: AdminStateAction;
-  icon?: string;
+  icon?: IconName;
   children?: ReactNode;
 };
 
@@ -20,14 +21,16 @@ export function InlineErrorBanner({
   description,
   primaryAction,
   secondaryAction,
-  icon = "ti-alert-triangle",
+  icon = "settings",
   children,
 }: InlineErrorBannerProps) {
+  const Icon = getIconComponent(icon);
+
   return (
     <aside className="rounded-lg border border-[var(--border-light)] bg-[var(--surface-card)] p-4">
       <div className="flex items-start gap-3">
         <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--tag-bg)] text-[var(--text-muted-5)]">
-          <i aria-hidden="true" className={`ti ${icon} text-base`} />
+          <Icon aria-hidden="true" size={16} stroke={1.5} />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-[var(--text-primary)]">

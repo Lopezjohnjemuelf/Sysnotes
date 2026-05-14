@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import {
   useEffect,
   useRef,
@@ -14,7 +15,21 @@ import type {
   AdminReleaseStatus as ReleaseStatus,
 } from "@/lib/releases/admin";
 import { PersistenceError } from "@/lib/errors";
+import { EditIcon, ReleaseIcon, SettingsIcon } from "@/lib/icons";
 import { useOptionalAdminPreview } from "./admin-preview-context";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
+  ssr: false,
+  loading: () => (
+    <div
+      style={{
+        height: 220,
+        background: "var(--surface-card)",
+        borderRadius: 8,
+      }}
+    />
+  ),
+});
 
 type ReleaseFormProps = {
   initialRelease?: AdminRelease | null;
@@ -265,9 +280,6 @@ export function ReleaseForm({
             <h2 className="mt-3 text-3xl font-semibold tracking-normal">
               {initialRelease ? initialRelease.version : "Create release"}
             </h2>
-            <p className="mt-2 text-xs italic text-[var(--text-muted-4)]">
-              What you see is what you get.
-            </p>
           </div>
           <button
             className="cursor-pointer border-0 bg-transparent p-0 text-xs text-[var(--text-muted-4)] underline-offset-4 hover:underline"
@@ -339,9 +351,6 @@ export function ReleaseForm({
       <div className="grid gap-2">
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm font-semibold">Release body</span>
-          <span className="text-xs italic text-[var(--text-muted-4)]">
-            What you see is what you get.
-          </span>
         </div>
 
         <div className="border border-[var(--admin-input-border)] bg-[var(--surface-card)]">
@@ -365,11 +374,11 @@ export function ReleaseForm({
 
             <div className="flex gap-1" aria-label="Markdown toolbar">
               {[
-                { tool: "heading", icon: "ti-heading", label: "Heading" },
-                { tool: "bold", icon: "ti-bold", label: "Bold" },
-                { tool: "list", icon: "ti-list", label: "Bullet list" },
-                { tool: "code", icon: "ti-code", label: "Inline code" },
-              ].map(({ tool, icon, label }) => (
+                { tool: "heading", icon: ReleaseIcon, label: "Heading" },
+                { tool: "bold", icon: EditIcon, label: "Bold" },
+                { tool: "list", icon: ReleaseIcon, label: "Bullet list" },
+                { tool: "code", icon: SettingsIcon, label: "Inline code" },
+              ].map(({ tool, icon: Icon, label }) => (
                 <button
                   aria-label={label}
                   className="grid h-8 w-8 place-items-center rounded-md text-[var(--text-muted-4)] transition hover:bg-[var(--tag-bg)] hover:text-[var(--text-primary)]"
@@ -378,19 +387,21 @@ export function ReleaseForm({
                   title={label}
                   type="button"
                 >
-                  <i aria-hidden="true" className={`ti ${icon} text-base`} />
+                  <Icon aria-hidden="true" size={16} stroke={1.5} />
                 </button>
               ))}
             </div>
           </div>
 
           {markdownTab === "write" ? (
-            <textarea
-              className="min-h-56 w-full resize-y border-0 bg-[var(--surface-card)] px-3 py-2 text-base leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted-4)]"
-              onChange={(event) => updateField("body", event.target.value)}
-              placeholder="Markdown details, bullet lists, and follow-up notes"
-              ref={bodyTextareaRef}
-              rows={9}
+            <MDEditor
+              height={220}
+              onChange={(value) => updateField("body", value ?? "")}
+              preview="edit"
+              textareaProps={{
+                placeholder:
+                  "Markdown details, bullet lists, and follow-up notes",
+              }}
               value={formState.body}
             />
           ) : (
@@ -479,14 +490,14 @@ export function ReleaseForm({
       {saveError ? (
         <InlineErrorBanner
           description="The release could not be saved. Browser storage may be full or temporarily unavailable."
-          icon="ti-device-floppy-off"
+          icon="settings"
           primaryAction={{
-            icon: "ti-refresh",
+            icon: "settings",
             label: "Retry",
             onClick: () => formRef.current?.requestSubmit(),
           }}
           secondaryAction={{
-            icon: "ti-arrow-left",
+            icon: "link",
             label: "Back to releases",
             onClick: onCancel,
           }}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { getTenantTheme } from "@/components/tenant/tenant-theme";
 import type { TenantIdentity } from "@/lib/types";
@@ -53,11 +54,15 @@ export function BrandIdentityPreview({ identity }: BrandIdentityPreviewProps) {
           {badgePosition === "left" ? liveBadge : null}
           <div className="min-w-0 text-base tracking-normal text-[var(--text-primary)]">
             {identity.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 alt={`${identity.brandName} logo`}
                 className="max-h-7 max-w-48 object-contain"
+                height={28}
                 src={identity.logoUrl}
+                style={{ width: "auto", height: 28 }}
+                sizes="140px"
+                unoptimized
+                width={140}
               />
             ) : (
               <Wordmark brandName={identity.brandName} />
@@ -98,10 +103,6 @@ export function BrandIdentityPreview({ identity }: BrandIdentityPreviewProps) {
             </p>
           </>
         )}
-        <p className="mt-3 text-sm italic text-[var(--text-muted-4)]">
-          What you see is what you get.
-        </p>
-
         <div className="mt-5 grid grid-cols-3 gap-2 border-t border-[var(--border-subtle)] pt-4 text-xs text-[var(--text-muted-4)]">
           <div>
             <p>Scheme</p>

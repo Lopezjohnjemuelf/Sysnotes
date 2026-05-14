@@ -52,7 +52,7 @@ export function getAdjacentReleases(
 
 export function TenantEyebrowPill({ children }: { children: string }) {
   return (
-    <p className="w-fit max-w-full rounded-full bg-[var(--tenant-accent-bg,var(--accent-bg))] px-4 py-2 text-sm font-medium text-[var(--tenant-accent-text,var(--accent-text))]">
+    <p className="tag-filter-pill w-fit max-w-full rounded-full bg-[var(--tenant-accent-bg,var(--accent-bg))] px-4 py-2 text-sm font-medium text-[var(--tenant-accent-text,var(--accent-text))]">
       {children}
     </p>
   );
@@ -76,7 +76,7 @@ export function LivePill() {
 
 export function ReleaseTagPill({ tag }: { tag: string }) {
   return (
-    <span className="max-w-full break-words rounded-full bg-[var(--tag-bg)] px-3 py-1 text-sm text-[var(--text-muted-4)]">
+    <span className="tag-filter-pill max-w-full break-words rounded-full bg-[var(--tag-bg)] px-3 py-1 text-sm text-[var(--text-muted-4)]">
       {tag}
     </span>
   );
@@ -105,7 +105,7 @@ export function TenantReleaseLink({
 }) {
   return (
     <Link
-      className="mt-5 inline-flex min-h-10 items-center text-[13px] font-medium text-[var(--tenant-accent-text,var(--accent-text))] transition hover:underline"
+      className="premium-text-link mt-5 inline-flex min-h-10 items-center text-[13px] font-medium text-[var(--tenant-accent-text,var(--accent-text))]"
       href={getTenantReleasePath(slug, version)}
     >
       {children}

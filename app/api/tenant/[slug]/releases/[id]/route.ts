@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import {
   isValidTenantSlug,
   readTenantReleases,
@@ -6,6 +7,8 @@ import {
 } from "@/lib/db/tenant-data";
 import { write } from "@/lib/db/file-store";
 import { normalizeRelease } from "@/lib/releases/persistence";
+import type { Release } from "@/lib/types";
+import { sanitizeString, sanitizeTags } from "@/lib/validate";
 
 type TenantReleaseRouteContext = {
   params: Promise<{
@@ -37,10 +40,27 @@ function notFoundResponse() {
   return NextResponse.json({ error: "Release not found." }, { status: 404 });
 }
 
+function stripShareToken(release: Release) {
+  return {
+    ...release,
+    shareToken: undefined,
+  };
+}
+
+function sanitizeRelease(release: Release): Release {
+  return {
+    ...release,
+    title: sanitizeString(release.title, 120),
+    summary: sanitizeString(release.summary, 600),
+    tags: sanitizeTags(release.tags),
+  };
+}
+
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: TenantReleaseRouteContext,
 ) {
+  const session = await auth();
   const { slug, id } = await params;
 
   if (!isValidTenantSlug(slug)) {
@@ -57,13 +77,36 @@ export async function GET(
     return notFoundResponse();
   }
 
-  return NextResponse.json(release);
+  if (session) {
+    return NextResponse.json(release);
+  }
+
+  const token = new URL(request.url).searchParams.get("token") ?? undefined;
+
+  if (release.status === "draft") {
+    return notFoundResponse();
+  }
+
+  if (
+    release.status === "private" &&
+    (!token || token !== release.shareToken)
+  ) {
+    return notFoundResponse();
+  }
+
+  return NextResponse.json(stripShareToken(release));
 }
 
 export async function PUT(
   request: Request,
   { params }: TenantReleaseRouteContext,
 ) {
+  const session = await auth();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   const { slug, id } = await params;
 
   if (!isValidTenantSlug(slug)) {
@@ -83,10 +126,11 @@ export async function PUT(
     return notFoundResponse();
   }
 
-  const release = normalizeRelease({
+  const normalizedRelease = normalizeRelease({
     ...(await request.json()),
     id,
   });
+  const release = normalizedRelease ? sanitizeRelease(normalizedRelease) : null;
 
   if (!release) {
     return NextResponse.json({ error: "Invalid release." }, { status: 400 });
@@ -103,6 +147,12 @@ export async function DELETE(
   _request: Request,
   { params }: TenantReleaseRouteContext,
 ) {
+  const session = await auth();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   const { slug, id } = await params;
 
   if (!isValidTenantSlug(slug)) {

@@ -1,7 +1,5 @@
-import {
-  NotImplementedError,
-  shouldUseTenantApi,
-} from "@/lib/persistence/errors";
+import { NotImplementedError } from "@/lib/persistence/errors";
+import { resolveTenantApiUrl } from "@/lib/persistence/api-url";
 import { PersistenceError } from "@/lib/errors";
 import type { Release, ReleaseStatus } from "@/lib/types";
 
@@ -12,8 +10,6 @@ export interface ReleasePersistenceService {
   save(r: Release): Promise<void>;
   delete(id: string): Promise<void>;
 }
-
-export const RELEASES_STORAGE_KEY = "sysnotes:releases:v1";
 
 function normalizeStatus(status: unknown): ReleaseStatus | null {
   if (typeof status !== "string") {
@@ -68,113 +64,8 @@ export function normalizeRelease(value: unknown): Release | null {
   };
 }
 
-function parseStoredReleases(value: string | null): Release[] {
-  if (!value) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed
-      .map((release) => normalizeRelease(release))
-      .filter((release): release is Release => release !== null);
-  } catch (err) {
-    console.warn(err);
-    return [];
-  }
-}
-
-function isQuotaExceededError(err: unknown) {
-  return (
-    err instanceof DOMException &&
-    (err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED")
-  );
-}
-
-function setStorageItem(key: string, value: string) {
-  try {
-    window.localStorage.setItem(key, value);
-  } catch (err) {
-    if (isQuotaExceededError(err)) {
-      throw new PersistenceError("Storage quota exceeded.");
-    }
-
-    console.warn(err);
-  }
-}
-
-export class LocalStorageReleaseService implements ReleasePersistenceService {
-  async getAll() {
-    if (typeof window === "undefined") {
-      return [];
-    }
-
-    try {
-      const storedValue = window.localStorage.getItem(RELEASES_STORAGE_KEY);
-
-      return parseStoredReleases(storedValue);
-    } catch (err) {
-      console.warn(err);
-      return [];
-    }
-  }
-
-  async save(release: Release) {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    try {
-      const releases = await this.getAll();
-      const nextReleases = releases.some(
-        (currentRelease) => currentRelease.id === release.id,
-      )
-        ? releases.map((currentRelease) =>
-            currentRelease.id === release.id ? release : currentRelease,
-          )
-        : [release, ...releases];
-
-      setStorageItem(RELEASES_STORAGE_KEY, JSON.stringify(nextReleases));
-    } catch (err) {
-      if (err instanceof PersistenceError) {
-        throw err;
-      }
-
-      console.warn(err);
-      return;
-    }
-  }
-
-  async delete(id: string) {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    try {
-      const releases = await this.getAll();
-
-      setStorageItem(
-        RELEASES_STORAGE_KEY,
-        JSON.stringify(releases.filter((release) => release.id !== id)),
-      );
-    } catch (err) {
-      if (err instanceof PersistenceError) {
-        throw err;
-      }
-
-      console.warn(err);
-      return;
-    }
-  }
-}
-
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(resolveTenantApiUrl(url), init);
 
   if (!response.ok) {
     throw new PersistenceError(`Request failed with status ${response.status}.`);
@@ -192,6 +83,28 @@ export class ApiReleaseService implements ReleasePersistenceService {
 
   async getAll(): Promise<Release[]> {
     return fetchJson<Release[]>(this.basePath);
+  }
+
+  async getPublished(): Promise<Release[]> {
+    const releases = await this.getAll();
+
+    return releases.filter((release) => release.status === "published");
+  }
+
+  async getById(version: string, token?: string): Promise<Release | null> {
+    const path = `${this.basePath}/${encodeURIComponent(version)}`;
+    const url = token ? `${path}?token=${encodeURIComponent(token)}` : path;
+    const response = await fetch(resolveTenantApiUrl(url));
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new PersistenceError(`Request failed with status ${response.status}.`);
+    }
+
+    return (await response.json()) as Release;
   }
 
   async save(release: Release): Promise<void> {
@@ -224,9 +137,12 @@ export class ApiReleaseService implements ReleasePersistenceService {
   }
 
   async delete(id: string): Promise<void> {
-    const response = await fetch(`${this.basePath}/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
+    const response = await fetch(
+      resolveTenantApiUrl(`${this.basePath}/${encodeURIComponent(id)}`),
+      {
+        method: "DELETE",
+      },
+    );
 
     if (!response.ok && response.status !== 404) {
       throw new PersistenceError(`Request failed with status ${response.status}.`);
@@ -235,9 +151,5 @@ export class ApiReleaseService implements ReleasePersistenceService {
 }
 
 export function getReleaseService(slug = "sysnotes"): ReleasePersistenceService {
-  if (shouldUseTenantApi()) {
-    return new ApiReleaseService(slug);
-  }
-
-  return new LocalStorageReleaseService();
+  return new ApiReleaseService(slug);
 }

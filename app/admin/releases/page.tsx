@@ -17,27 +17,29 @@ import {
   type AdminReleaseStatus,
 } from "@/lib/releases/admin";
 import {
-  RELEASES_STORAGE_KEY,
   getReleaseService,
 } from "@/lib/releases/persistence";
-import { TENANT_IDENTITY_STORAGE_KEY } from "@/lib/tenant/identity";
 import { PersistenceError } from "@/lib/errors";
-import { shouldUseTenantApi } from "@/lib/persistence/errors";
-import { getTenantService } from "@/lib/tenant/service";
+import { getTenantService } from "@/lib/tenant/persistence";
 import {
   ADMIN_SETTINGS_STORAGE_KEY,
   DEFAULT_ADMIN_SETTINGS,
   parseStoredAdminSettings,
 } from "@/lib/admin/settings";
+import {
+  DeleteIcon,
+  EditIcon,
+  LinkIcon,
+  LockIcon,
+  type IconComponent,
+} from "@/lib/icons";
 
 const WELCOME_MODAL_KEY = "sysnotes:admin-welcome:v1";
 
 type ReleasesPageFailure =
   | "load"
   | "save"
-  | "storage-unavailable"
-  | "corrupt-releases"
-  | "corrupt-identity";
+  | "tenant-missing";
 
 async function copyText(value: string) {
   if (navigator.clipboard?.writeText) {
@@ -56,36 +58,6 @@ async function copyText(value: string) {
   document.body.removeChild(textarea);
 }
 
-function isInvalidJson(value: string | null) {
-  if (value === null) {
-    return false;
-  }
-
-  try {
-    JSON.parse(value);
-    return false;
-  } catch (err) {
-    console.warn(err);
-    return true;
-  }
-}
-
-function isInvalidReleaseStorage(value: string | null) {
-  if (isInvalidJson(value)) {
-    return true;
-  }
-
-  if (value === null) {
-    return false;
-  }
-
-  try {
-    return !Array.isArray(JSON.parse(value));
-  } catch {
-    return true;
-  }
-}
-
 function refreshPage() {
   window.location.reload();
 }
@@ -101,7 +73,7 @@ function StatusPill({ status }: { status: AdminReleaseStatus }) {
       className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium ${className}`}
     >
       {status === "Private" ? (
-        <i aria-hidden="true" className="ti ti-lock text-[12px]" />
+        <LockIcon aria-hidden="true" size={12} stroke={2} />
       ) : null}
       {status}
     </span>
@@ -140,10 +112,12 @@ function RowActionButton({
   label,
   onClick,
 }: {
-  icon: "ti-copy" | "ti-edit" | "ti-trash";
+  icon: IconComponent;
   label: string;
   onClick: () => void;
 }) {
+  const Icon = icon;
+
   return (
     <button
       aria-label={label}
@@ -152,7 +126,7 @@ function RowActionButton({
       title={label}
       type="button"
     >
-      <i aria-hidden="true" className={`ti ${icon} text-[12px]`} />
+      <Icon aria-hidden="true" size={14} stroke={1.5} />
     </button>
   );
 }
@@ -189,7 +163,6 @@ export default function AdminReleasesPage() {
     () => getReleaseService(identity.slug),
     [identity.slug],
   );
-  const useTenantApi = shouldUseTenantApi();
   const selectAllCheckboxRef = useRef<HTMLInputElement | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [releases, setReleases] = useState<AdminRelease[]>([]);
@@ -244,33 +217,13 @@ export default function AdminReleasesPage() {
 
     async function loadReleases() {
       try {
-        const storedIdentity = useTenantApi
-          ? await getTenantService(identity.slug).load()
-          : window.localStorage.getItem(TENANT_IDENTITY_STORAGE_KEY);
-        const storedReleaseValue = useTenantApi
-          ? null
-          : window.localStorage.getItem(RELEASES_STORAGE_KEY);
-
-        if (!useTenantApi && isInvalidJson(storedIdentity as string | null)) {
-          if (isMounted) {
-            setPageFailure("corrupt-identity");
-            setHasLoaded(true);
-          }
-          return;
-        }
-
-        if (isInvalidReleaseStorage(storedReleaseValue)) {
-          if (isMounted) {
-            setPageFailure("corrupt-releases");
-            setHasLoaded(true);
-          }
-          return;
-        }
+        const storedIdentity = await getTenantService(identity.slug).load();
 
         if (storedIdentity === null) {
           if (isMounted) {
             setReleases([]);
             setIsTenantConfigured(false);
+            setPageFailure("tenant-missing");
             setShowWelcomeModal(
               window.localStorage.getItem(WELCOME_MODAL_KEY) === "pending",
             );
@@ -287,6 +240,7 @@ export default function AdminReleasesPage() {
 
         setReleases(storedReleases.map(toAdminRelease));
         setIsTenantConfigured(true);
+        setPageFailure(null);
         setShowWelcomeModal(
           window.localStorage.getItem(WELCOME_MODAL_KEY) === "pending",
         );
@@ -298,9 +252,7 @@ export default function AdminReleasesPage() {
           return;
         }
 
-        setPageFailure(
-          err instanceof DOMException ? "storage-unavailable" : "load",
-        );
+        setPageFailure("load");
         setHasLoaded(true);
       }
     }
@@ -310,7 +262,7 @@ export default function AdminReleasesPage() {
     return () => {
       isMounted = false;
     };
-  }, [identity.slug, releaseService, useTenantApi]);
+  }, [identity.slug, releaseService]);
 
   useEffect(() => {
     function syncAdminSettings() {
@@ -578,16 +530,6 @@ export default function AdminReleasesPage() {
     setShowWelcomeModal(false);
   }
 
-  function resetCorruptedReleases() {
-    window.localStorage.removeItem(RELEASES_STORAGE_KEY);
-    refreshPage();
-  }
-
-  function resetCorruptedIdentity() {
-    window.localStorage.removeItem(TENANT_IDENTITY_STORAGE_KEY);
-    window.location.assign("/admin/identity");
-  }
-
   if (!hasLoaded) {
     return (
       <div className="border border-[var(--border-light)] bg-[var(--surface-card)] p-6 text-sm text-[var(--text-muted-5)]">
@@ -596,67 +538,23 @@ export default function AdminReleasesPage() {
     );
   }
 
-  if (pageFailure === "storage-unavailable") {
+  if (pageFailure === "tenant-missing") {
     return (
       <ErrorStateCard
-        eyebrow="Local data unavailable"
-        description="Sysnotes could not read local admin data from this browser. Enable local storage for the site, then refresh the admin portal."
-        icon="ti-database-off"
+        eyebrow="Tenant identity"
+        description="No tenant identity is saved for this slug yet. Configure identity before publishing tenant releases."
+        icon="settings"
         primaryAction={{
-          icon: "ti-refresh",
-          label: "Refresh page",
-          onClick: refreshPage,
-        }}
-        secondaryAction={{
-          href: "/admin/releases",
-          icon: "ti-layout-dashboard",
-          label: "Go to dashboard",
-        }}
-        title="Admin data could not be loaded"
-      />
-    );
-  }
-
-  if (pageFailure === "corrupt-releases") {
-    return (
-      <ErrorStateCard
-        eyebrow="Local data fallback"
-        description="Saved release data in this browser is missing required structure or is not readable JSON. Reset only the local release data to continue."
-        icon="ti-database-exclamation"
-        primaryAction={{
-          icon: "ti-refresh",
-          label: "Reset local data",
-          onClick: resetCorruptedReleases,
-          variant: "destructive",
-        }}
-        secondaryAction={{
-          icon: "ti-reload",
-          label: "Refresh page",
-          onClick: refreshPage,
-        }}
-        title="Release storage looks corrupted"
-      />
-    );
-  }
-
-  if (pageFailure === "corrupt-identity") {
-    return (
-      <ErrorStateCard
-        eyebrow="Local data fallback"
-        description="Saved tenant identity data in this browser is not readable. Reset only the local identity data, then configure the tenant again."
-        icon="ti-database-exclamation"
-        primaryAction={{
-          icon: "ti-refresh",
-          label: "Reset local data",
-          onClick: resetCorruptedIdentity,
-          variant: "destructive",
-        }}
-        secondaryAction={{
           href: "/admin/identity",
-          icon: "ti-palette",
+          icon: "identity",
           label: "Configure tenant identity",
         }}
-        title="Tenant identity storage looks corrupted"
+        secondaryAction={{
+          icon: "settings",
+          label: "Retry",
+          onClick: refreshPage,
+        }}
+        title="Tenant identity is not configured"
       />
     );
   }
@@ -666,15 +564,15 @@ export default function AdminReleasesPage() {
       <ErrorStateCard
         eyebrow="Failed load"
         description="The releases table could not be loaded. Retry the view or return to the dashboard."
-        icon="ti-cloud-off"
+        icon="settings"
         primaryAction={{
-          icon: "ti-refresh",
+          icon: "settings",
           label: "Retry",
           onClick: refreshPage,
         }}
         secondaryAction={{
           href: "/admin/identity",
-          icon: "ti-palette",
+          icon: "identity",
           label: "Configure tenant identity",
         }}
         title="Releases could not be loaded"
@@ -686,16 +584,16 @@ export default function AdminReleasesPage() {
     return (
       <ErrorStateCard
         eyebrow="Failed save"
-        description="The latest admin change could not be saved. Browser storage may be full or unavailable. Refresh the page before making more edits."
-        icon="ti-device-floppy-off"
+        description="The latest admin change could not be saved. Refresh the page before making more edits."
+        icon="settings"
         primaryAction={{
-          icon: "ti-refresh",
+          icon: "settings",
           label: "Refresh page",
           onClick: refreshPage,
         }}
         secondaryAction={{
           href: "/admin/releases",
-          icon: "ti-notes",
+          icon: "release",
           label: "Back to releases",
         }}
         title="Changes could not be saved"
@@ -720,9 +618,6 @@ export default function AdminReleasesPage() {
               Publish, draft, and organize tenant release notes for the
               standalone public page at /[slug]/*.
             </p>
-            <p className="mt-2 text-xs italic text-[var(--text-muted-4)]">
-              What you see is what you get.
-            </p>
           </div>
 
           <button
@@ -737,16 +632,16 @@ export default function AdminReleasesPage() {
         {isOffline ? (
           <div className="mt-6">
             <InlineErrorBanner
-              description="You appear to be offline. Local edits may still work, but network-backed admin saves and refreshes can fail until the connection returns."
-              icon="ti-wifi-off"
+              description="You appear to be offline. Admin saves and refreshes can fail until the connection returns."
+              icon="settings"
               primaryAction={{
-                icon: "ti-refresh",
+                icon: "settings",
                 label: "Retry",
                 onClick: refreshPage,
               }}
               secondaryAction={{
                 href: "/admin/releases",
-                icon: "ti-layout-dashboard",
+                icon: "dashboard",
                 label: "Go to dashboard",
               }}
               title="Network connection is offline"
@@ -759,15 +654,15 @@ export default function AdminReleasesPage() {
             <EmptyStateCard
               eyebrow="Tenant not configured"
               description="Set the tenant brand, slug, colors, and preview defaults before publishing releases for a public changelog."
-              icon="ti-palette"
+              icon="identity"
               primaryAction={{
                 href: "/admin/identity",
-                icon: "ti-palette",
+                icon: "identity",
                 label: "Configure tenant identity",
               }}
               secondaryAction={{
                 href: "/admin/releases",
-                icon: "ti-layout-dashboard",
+                icon: "dashboard",
                 label: "Go to dashboard",
               }}
               title="Configure tenant identity first"
@@ -777,15 +672,15 @@ export default function AdminReleasesPage() {
           <div className="mt-8">
             <EmptyStateCard
               description="There are no admin releases yet. Create the first release to start building the tenant changelog."
-              icon="ti-notes"
+              icon="release"
               primaryAction={{
-                icon: "ti-plus",
+                icon: "edit",
                 label: "Create first release",
                 onClick: openNewReleasePanel,
               }}
               secondaryAction={{
                 href: "/admin/identity",
-                icon: "ti-palette",
+                icon: "identity",
                 label: "Configure tenant identity",
               }}
               title="No releases yet"
@@ -929,7 +824,7 @@ export default function AdminReleasesPage() {
                       <div className="flex gap-2">
                         {release.status === "Private" ? (
                           <RowActionButton
-                            icon="ti-copy"
+                            icon={LinkIcon}
                             label={
                               copiedReleaseId === release.id
                                 ? "Private link copied"
@@ -939,12 +834,12 @@ export default function AdminReleasesPage() {
                           />
                         ) : null}
                         <RowActionButton
-                          icon="ti-edit"
+                          icon={EditIcon}
                           label="Edit"
                           onClick={() => openEditReleasePanel(release)}
                         />
                         <RowActionButton
-                          icon="ti-trash"
+                          icon={DeleteIcon}
                           label="Delete"
                           onClick={() => requestDelete(release.id)}
                         />
@@ -1008,14 +903,14 @@ export default function AdminReleasesPage() {
               <ErrorStateCard
                 eyebrow="Release not found"
                 description="This release is no longer available in the admin list. It may have been deleted or removed from local storage."
-                icon="ti-file-alert"
+                icon="settings"
                 primaryAction={{
-                  icon: "ti-arrow-left",
+                  icon: "link",
                   label: "Back to releases",
                   onClick: closePanel,
                 }}
                 secondaryAction={{
-                  icon: "ti-plus",
+                  icon: "edit",
                   label: "Create first release",
                   onClick: openNewReleasePanel,
                 }}

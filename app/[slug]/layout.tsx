@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { DEFAULT_TENANT_IDENTITY } from "@/lib/tenant/identity";
 import { loadTenantPage } from "@/lib/tenant/page-helpers";
 import { TenantLayoutClient } from "./tenant-layout-client";
 
 type TenantLayoutProps = {
   children: ReactNode;
+  params: Promise<{
+    slug: string;
+  }>;
 };
 
 type TenantLayoutMetadataProps = {
@@ -14,6 +17,8 @@ type TenantLayoutMetadataProps = {
     slug: string;
   }>;
 };
+
+const RESERVED = ["admin", "api", "login", "register", "about", "releases"];
 
 async function getRequestOrigin() {
   const requestHeaders = await headers();
@@ -28,14 +33,35 @@ export async function generateMetadata({
   params,
 }: TenantLayoutMetadataProps): Promise<Metadata> {
   const { slug } = await params;
+
+  if (RESERVED.includes(slug)) {
+    return {
+      title: "Not found",
+      robots: "noindex, nofollow",
+    };
+  }
+
   const [origin, tenantPage] = await Promise.all([
     getRequestOrigin(),
     loadTenantPage(slug),
   ]);
-  const identity = tenantPage?.identity ?? {
-    ...DEFAULT_TENANT_IDENTITY,
-    slug,
-  };
+
+  if (!tenantPage) {
+    return {
+      title: "Not found",
+      robots: "noindex, nofollow",
+    };
+  }
+
+  const identity = tenantPage.identity;
+
+  if (identity.comingSoon) {
+    return {
+      title: `${identity.brandName} — Coming Soon`,
+      robots: "noindex, nofollow",
+    };
+  }
+
   const title = `${identity.brandName} Release Notes`;
   const description = `Latest releases and updates from ${identity.brandName}.`;
   const url = `${origin}/${slug}`;
@@ -61,6 +87,25 @@ export async function generateMetadata({
   };
 }
 
-export default function TenantLayout({ children }: TenantLayoutProps) {
-  return <TenantLayoutClient>{children}</TenantLayoutClient>;
+export default async function TenantLayout({
+  children,
+  params,
+}: TenantLayoutProps) {
+  const { slug } = await params;
+
+  if (RESERVED.includes(slug)) {
+    notFound();
+  }
+
+  const tenantPage = await loadTenantPage(slug);
+
+  if (!tenantPage) {
+    notFound();
+  }
+
+  return (
+    <TenantLayoutClient identity={tenantPage.identity}>
+      {children}
+    </TenantLayoutClient>
+  );
 }

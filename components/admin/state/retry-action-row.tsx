@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { getIconComponent, type IconName } from "@/lib/icons";
 
 export type AdminStateAction = {
   label: string;
   href?: string;
   onClick?: () => void;
-  icon?: string;
+  icon?: IconName;
   disabled?: boolean;
   variant?: "primary" | "secondary" | "destructive";
 };
@@ -18,11 +19,11 @@ type RetryActionRowProps = {
 };
 
 function ActionContent({ action }: { action: AdminStateAction }) {
+  const Icon = action.icon ? getIconComponent(action.icon) : null;
+
   return (
     <>
-      {action.icon ? (
-        <i aria-hidden="true" className={`ti ${action.icon} text-base`} />
-      ) : null}
+      {Icon ? <Icon aria-hidden="true" size={16} stroke={1.5} /> : null}
       <span>{action.label}</span>
     </>
   );

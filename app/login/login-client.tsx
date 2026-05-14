@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -77,6 +78,16 @@ export function LoginClient() {
       >
         {isSubmitting ? "Signing in..." : "Login"}
       </button>
+
+      <p className="mt-3 text-center text-[13px] text-[var(--text-muted-5)]">
+        Don&apos;t have an account?{" "}
+        <Link
+          className="font-medium text-[var(--accent-text)] transition-[color] duration-[var(--transition-fast)] hover:underline"
+          href="/register"
+        >
+          Register
+        </Link>
+      </p>
     </form>
   );
 }

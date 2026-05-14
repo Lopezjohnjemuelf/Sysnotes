@@ -18,11 +18,11 @@ export default function AdminError({
     <ErrorStateCard
       eyebrow="Unexpected error"
       description="Something went wrong while rendering the admin portal. Retry the view, refresh the page, or return to releases."
-      icon="ti-alert-circle"
-      primaryAction={{ icon: "ti-refresh", label: "Retry", onClick: reset }}
+      icon="settings"
+      primaryAction={{ icon: "settings", label: "Retry", onClick: reset }}
       secondaryAction={{
         href: "/admin/releases",
-        icon: "ti-notes",
+        icon: "release",
         label: "Back to releases",
       }}
       title="The admin view could not be loaded"

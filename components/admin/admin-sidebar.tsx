@@ -2,14 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  DashboardIcon,
+  IdentityIcon,
+  ReleaseIcon,
+  SettingsIcon,
+} from "@/lib/icons";
 import { AdminLogoutButton } from "./admin-logout-button";
 import { useTenantIdentity } from "./tenant-identity-ui";
 
 const navItems = [
-  { href: "/admin", icon: "ti-layout-dashboard", label: "Dashboard" },
-  { href: "/admin/releases", icon: "ti-notes", label: "Releases" },
-  { href: "/admin/identity", icon: "ti-palette", label: "Identity" },
-  { href: "/admin/settings", icon: "ti-settings", label: "Settings" },
+  { href: "/admin", icon: DashboardIcon, label: "Dashboard" },
+  { href: "/admin/releases", icon: ReleaseIcon, label: "Releases" },
+  { href: "/admin/identity", icon: IdentityIcon, label: "Identity" },
+  { href: "/admin/settings", icon: SettingsIcon, label: "Settings" },
 ];
 
 function isActivePath(pathname: string, href: string) {
@@ -37,6 +43,7 @@ export function AdminSidebar() {
         <nav className="grid gap-1">
           {navItems.map((item) => {
             const isActive = isActivePath(pathname, item.href);
+            const Icon = item.icon;
 
             return (
               <Link
@@ -48,7 +55,7 @@ export function AdminSidebar() {
                 href={item.href}
                 key={item.href}
               >
-                <i aria-hidden="true" className={`ti ${item.icon} text-base`} />
+                <Icon aria-hidden="true" size={16} stroke={1.5} />
                 {item.label}
               </Link>
             );

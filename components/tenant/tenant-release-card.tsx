@@ -25,7 +25,7 @@ export function TenantReleaseCard({
 
   return (
     <article
-      className="overflow-hidden border-b border-[var(--border-subtle)] py-6 sm:py-7"
+      className="premium-card-hover min-h-[13rem] overflow-hidden border-b border-[var(--border-subtle)] py-6 sm:py-7"
       style={tenantAccentStyle}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">

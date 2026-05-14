@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { getIconComponent, type IconName } from "@/lib/icons";
 import {
   RetryActionRow,
   type AdminStateAction,
@@ -14,7 +15,7 @@ export type AdminStateCardProps = {
   primaryAction: AdminStateAction;
   secondaryAction?: AdminStateAction;
   eyebrow?: string;
-  icon?: string;
+  icon?: IconName;
   tone?: AdminStateTone;
   children?: ReactNode;
 };
@@ -23,21 +24,21 @@ const toneDefaults: Record<
   AdminStateTone,
   {
     eyebrow: string;
-    icon: string;
+    icon: IconName;
     iconClassName: string;
     sectionClassName: string;
   }
 > = {
   empty: {
     eyebrow: "Empty state",
-    icon: "ti-inbox",
+    icon: "release",
     iconClassName: "bg-[var(--tag-bg)] text-[var(--text-muted-5)]",
     sectionClassName:
       "rounded-lg border border-dashed border-[var(--border-light)] bg-[var(--surface-card)] p-6",
   },
   error: {
     eyebrow: "Needs attention",
-    icon: "ti-alert-circle",
+    icon: "settings",
     iconClassName:
       "border border-[var(--border-subtle)] bg-[var(--surface-page)] text-[var(--text-primary)]",
     sectionClassName:
@@ -56,6 +57,7 @@ export function AdminStateCard({
   children,
 }: AdminStateCardProps) {
   const defaults = toneDefaults[tone];
+  const Icon = getIconComponent(icon ?? defaults.icon);
 
   return (
     <section className={defaults.sectionClassName}>
@@ -63,10 +65,7 @@ export function AdminStateCard({
         <div
           className={`grid h-10 w-10 place-items-center rounded-full ${defaults.iconClassName}`}
         >
-          <i
-            aria-hidden="true"
-            className={`ti ${icon ?? defaults.icon} text-xl`}
-          />
+          <Icon aria-hidden="true" size={20} stroke={1.5} />
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted-1)]">

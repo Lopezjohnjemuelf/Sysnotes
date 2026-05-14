@@ -1,6 +1,19 @@
+@import "./animations.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 :root {
   --color-cream-50: #fbfbf7;
@@ -15,6 +28,8 @@
   --color-ink-opacity-62: rgba(0, 0, 0, 0.62);
   --color-ink-opacity-65: rgba(0, 0, 0, 0.65);
   --color-ink-opacity-70: rgba(0, 0, 0, 0.7);
+  --color-muted-aa: #767672;
+  --color-muted-strong-aa: #636360;
   --color-border-subtle: rgba(0, 0, 0, 0.1);
   --color-border-light: rgba(0, 0, 0, 0.15);
   --color-lime-300: #d7ef7d;
@@ -29,8 +44,8 @@
   --text-muted-2: var(--color-ink-opacity-50);
   --text-muted-3: var(--color-ink-opacity-55);
   --text-muted-tag: var(--color-ink-opacity-58);
-  --text-muted-4: var(--color-ink-opacity-60);
-  --text-muted-5: var(--color-ink-opacity-62);
+  --text-muted-4: var(--color-muted-aa);
+  --text-muted-5: var(--color-muted-strong-aa);
   --text-muted-6: var(--color-ink-opacity-65);
   --text-muted-7: var(--color-ink-opacity-70);
   --error-text: var(--text-primary);
@@ -39,6 +54,11 @@
   --accent-bg: var(--color-lime-300);
   --accent-text: var(--color-lime-900);
   --tag-bg: var(--color-tag-bg);
+  --radius-sm: 0.375rem;
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   --tenant-brand-name: "Sysnotes by JFL";
   --tenant-logo-url: none;

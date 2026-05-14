@@ -1,18 +1,27 @@
+import Image from "next/image";
 import type { TenantIdentity } from "@/lib/types";
 
 type TenantBrandMarkProps = {
+  fetchPriority?: "high" | "low" | "auto";
   identity: TenantIdentity;
 };
 
-export function TenantBrandMark({ identity }: TenantBrandMarkProps) {
+export function TenantBrandMark({
+  fetchPriority,
+  identity,
+}: TenantBrandMarkProps) {
   if (identity.logoUrl) {
     return (
-      <img
+      <Image
         alt={identity.brandName}
+        fetchPriority={fetchPriority}
         className="max-h-7 max-w-[min(12rem,58vw)] object-contain"
         height={28}
         src={identity.logoUrl}
-        style={{ width: "auto" }}
+        style={{ width: "auto", height: 28 }}
+        sizes="140px"
+        unoptimized
+        width={140}
       />
     );
   }

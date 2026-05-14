@@ -2,11 +2,25 @@
 
 ## Overview
 
-Status: Current and planned
+Status: Post Phase 8
 
 Sysnotes by JFL is a minimalist changelog website for publishing release notes and website changes. The current public page is quiet, editorial, and scan-first: it favors generous spacing, clear hierarchy, thin borders, muted text, and a single high-visibility accent color.
 
-The existing site is implemented as a single Next.js page in `app/page.tsx`, with global styling in `app/globals.css` and utility-first layout through Tailwind CSS.
+The site uses Next.js 15, React 19, Tailwind CSS 3, and CSS tokens in `app/globals.css`.
+
+Architecture boundaries:
+
+- `/` is the frozen Sysnotes changelog. Do not edit `app/page.tsx` or `components/header.tsx` for tenant/admin work.
+- `/[slug]/*` is the isolated tenant standalone branded page.
+- `/admin/*` is the server-protected admin portal.
+- Tenant releases publish only to `/[slug]/*`, never to `/`.
+
+Persistence boundaries:
+
+- `getTenantService()` and `getReleaseService(slug)` are server-only services.
+- V1 persistence is file-based under `data/*.json`.
+- Browser admin screens use tenant API routes for tenant identity and releases.
+- Server-side tenant data must not use `localStorage`.
 
 Brand status: Implemented
 
@@ -52,7 +66,7 @@ All former `Systnotes` references should be treated as legacy spelling and repla
 - Logo upload
 - Accent color selection
 - Live preview
-- Browser `localStorage` persistence
+- File-backed tenant persistence through API routes
 
 ## Design Intent
 
@@ -363,7 +377,7 @@ Implemented styling:
 
 ## Admin Portal Page
 
-Status: Implemented with browser localStorage v1
+Status: Implemented with file-backed tenant persistence v1
 
 ### Purpose
 
@@ -371,10 +385,11 @@ The Admin Portal allows account owners to set a custom company identity: logo, a
 
 V1 behavior:
 
-- Saves identity settings to browser `localStorage`.
-- Applies saved values to the Admin Portal preview only.
-- Does not apply saved values to the public homepage yet.
-- Does not include authentication, password gates, or upstream session checks yet.
+- Saves identity settings through `/api/tenant/[slug]/identity`.
+- Persists tenant identity to `data/tenant-[slug].json`.
+- Applies saved values to the Admin Portal preview and tenant standalone pages.
+- Keeps the public homepage frozen and independent of tenant identity.
+- Requires an authenticated admin session for mutation routes.
 
 ### Route
 
@@ -382,7 +397,7 @@ V1 behavior:
 /admin/identity
 ```
 
-Authentication is planned to be handled upstream through a session check at layout level. The admin page itself should not contain a login form.
+Authentication is handled through NextAuth credentials and middleware for `/admin/*`. Tenant API mutation routes also require a session.
 
 ### Component Inventory
 
@@ -480,7 +495,7 @@ Status: Implemented in components
 
 ### Save Behavior
 
-Status: Implemented with browser localStorage v1
+Status: Implemented with file-backed tenant persistence v1
 
 On save, the component:
 
@@ -492,15 +507,11 @@ On save, the component:
 
 The route-level adapter:
 
-- Loads `sysnotes:tenant-identity:v1` from browser `localStorage`.
-- Falls back to default identity if storage is empty or malformed.
-- Writes normalized identity JSON back to `localStorage` on save.
+- Loads tenant identity through the tenant API.
+- Falls back to default identity if no tenant identity has been saved yet.
+- Writes normalized identity JSON through the tenant API on save.
 
-Planned future behavior:
-
-- Write `--tenant-*` values to a shared tenant CSS override record.
-- Load existing tenant identity from shared persistence before rendering the form.
-- Apply saved identity to the public homepage.
+Tenant identity applies to `/[slug]/*` only. The root changelog remains the Sysnotes changelog.
 
 ### Accessibility
 
@@ -604,15 +615,19 @@ The Admin Portal preview panel uses no shadow and is contained by its border onl
 
 Status: Implemented public and tenant models
 
-### Release Note
+### Release
 
 ```ts
 {
+  id: string;
   version: string;
   date: string;
   title: string;
   summary: string;
+  body?: string;
   tags: string[];
+  status: "published" | "draft" | "private";
+  shareToken?: string;
 }
 ```
 
@@ -640,16 +655,30 @@ Status: Implemented
 
 ```ts
 {
+  slug: string;
   brandName: string;
   logoUrl: string | null;
   accentBg: string;
   accentText: string;
+  colorScheme?: "light" | "dark";
+  fontFamily?: "sans" | "serif" | "mono";
+  badgePosition?: "left" | "right";
+  comingSoon?: boolean;
+  webhookUrl?: string;
 }
 ```
 
-The current local arrays are simple enough to move later into a CMS, MDX, database, or API-backed content pipeline.
+### Subscriber
 
-V1 tenant identity is browser-local only. Shared tenant persistence remains planned.
+```ts
+{
+  email: string;
+  slug: string;
+  subscribedAt: string;
+}
+```
+
+Tenant identity, tenant releases, and subscribers are persisted per tenant. The static root changelog data remains separate.
 
 ## Responsive Behavior
 
@@ -715,9 +744,8 @@ Current:
 
 Planned:
 
-- Replace browser-local admin persistence with shared tenant persistence.
-- Apply saved tenant identity to the public homepage.
-- Add authentication or upstream session protection for the admin route.
+- Move the file-backed service implementations behind an external API when needed.
+- Extend admin reset/export behavior for tenant data.
 
 ## Current Design Direction
 
